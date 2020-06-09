@@ -29,14 +29,15 @@ var currentGrowConfig;
 
 function AttemptToAuthenticate() {
     fetch('http://192.168.0.224:3000/authenticate', {
-        method: 'POST', body: {
+        method: 'POST',
+        body: JSON.stringify({
             "email": "sdenomme15@gmail.com",
             "password": "pasteFlux1992"
-        }
+        })
     })
         .then(res => res.json())
         .then(json => {
-            if (json) {
+            if (!json.errors) {
                 console.log(json);
                 var token = json.token;
 
