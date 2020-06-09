@@ -32,7 +32,7 @@ function AttemptToAuthenticate() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            "email": "sdenomme15@gmail.coms",
+            "email": "sdenomme15@gmail.com",
             "password": "pasteFlux1992"
         })
     };
