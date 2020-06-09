@@ -27,16 +27,28 @@ var relayHandler;
 var currentGrow;
 var currentGrowConfig;
 
-fetch('http://192.168.0.224:3000/authenticate', {
-    method: 'POST', body: {
-        "email": "sdenomme15@gmail.com",
-        "password": "pasteFlux1992"
-    }
-}).then(res => res.json())
-    .then(json => {
-        console.log(json);
-        InitializeWebSocket(json);
-    });
+function AttemptToAuthenticate() {
+    fetch('http://192.168.0.224:3000/authenticate', {
+        method: 'POST', body: {
+            "email": "sdenomme15@gmail.com",
+            "password": "pasteFlux1992"
+        }
+    }).then(res => res.json())
+        .then(json => {
+            if (json) {
+                console.log(json);
+                InitializeWebSocket(json);
+            } else {
+                console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
+
+                setTimeout(AttemptToAuthenticate(), 5000);
+            }
+        });
+}
+
+AttemptToAuthenticate();
+
+
 
 function InitializeWebSocket() {
     console.log("Initializing Websocket");
