@@ -27,6 +27,8 @@ var relayHandler;
 var currentGrow;
 var currentGrowConfig;
 
+var token;
+
 function AttemptToAuthenticate() {
     const requestOptions = {
         method: 'POST',
@@ -41,9 +43,9 @@ function AttemptToAuthenticate() {
         .then(res => res.json())
         .then(json => {
             if (!json.errors) {
-                var token = json.token;
+                token = json.token;
 
-                InitializeWebSocket(token);
+                InitializeWebSocket();
             } else {
                 console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
 
@@ -57,67 +59,72 @@ function AttemptToAuthenticate() {
 
 AttemptToAuthenticate();
 
-function InitializeWebSocket(token) {
+function InitializeWebSocket() {
     console.log("Initializing Websocket...");
 
-    var ws = new WebSocket("ws://192.168.0.224:8080", {
-        headers: {
-            token: token
-        }
-    });
+    if (token) {
+        var ws = new WebSocket("ws://192.168.0.224:8080", {
+            headers: {
+                token: token
+            }
+        });
 
-    ws.on('open', function () {
-        console.log('Connection successfully opened to server.');
-        console.log('Turning on green connectivity LED.');
-        connectedGreenLED.writeSync(1);
-    });
+        ws.on('open', function () {
+            console.log('Connection successfully opened to server.');
+            console.log('Turning on green connectivity LED.');
+            connectedGreenLED.writeSync(1);
+        });
 
-    ws.on('close', function close() {
-        console.log('Connection broken to server... Attempting to re-open connection in 5 seconds.');
-        console.log('Turning off green connectivity LED.');
-        connectedGreenLED.writeSync(0);
+        ws.on('close', function close() {
+            console.log('Connection broken to server... Attempting to re-open connection in 5 seconds.');
+            console.log('Turning off green connectivity LED.');
+            connectedGreenLED.writeSync(0);
 
-        setTimeout(InitializeWebSocket, 5000);
+            setTimeout(AttemptToAuthenticate, 5000);
 
-        console.log('Stopping data send handler.');
-        clearInterval(dataHandler);
-    });
+            console.log('Stopping data send handler.');
+            clearInterval(dataHandler);
+        });
 
 // TODO: Come up with a better way to identify specific events
-    ws.on('message', function (data, flags) {
-        if (data) {
-            data = JSON.parse(data);
+        ws.on('message', function (data, flags) {
+            if (data) {
+                data = JSON.parse(data);
 
-            // Is initialization?
-            if (data.initialization) {
-                console.log(data.message);
+                // Is initialization?
+                if (data.initialization) {
+                    console.log(data.message);
 
-                console.log("Sending ID's to server, waiting for data send event.");
-                console.log('');
+                    console.log("Sending ID's to server, waiting for data send event.");
+                    console.log('');
 
-                ws.send(JSON.stringify({
-                    growId: raspberryPiGrowId,
-                    scriptId: raspberryPiId,
-                    identify: true
-                }));
+                    ws.send(JSON.stringify({
+                        growId: raspberryPiGrowId,
+                        scriptId: raspberryPiId,
+                        identify: true
+                    }));
+                }
+
+                if (data.send) {
+                    currentGrow = data.grow;
+                    currentGrowConfig = data.config;
+
+                    AnalyzeRelays();
+
+                    // Set sensor data loop
+                    dataHandler = setInterval(AttemptToGetDataFromSensors, 30000);
+                }
+
+                // Is relay manual override?
+                if (data.relayOverride) {
+                    // Collect GPIO pin and attempt to turn it on / off
+                }
             }
-
-            if (data.send) {
-                currentGrow = data.grow;
-                currentGrowConfig = data.config;
-
-                AnalyzeRelays();
-
-                dataHandler = setInterval(AttemptToGetDataFromSensors, 30000);
-            }
-
-            // Is relay manual override?
-            if (data.relayOverride) {
-                // Collect GPIO pin and attempt to turn it on / off
-            }
-        }
-    });
-
+        });
+    } else {
+        // NO TOKEN
+        console.log("NO TOKEN??");
+    }
 }
 
 async function AttemptToGetDataFromSensors() {
