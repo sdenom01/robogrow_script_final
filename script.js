@@ -1,4 +1,3 @@
-
 const gpio = require('onoff').Gpio;
 
 const connectedGreenLED = new gpio(16, 'out');
@@ -16,7 +15,16 @@ const lumenSensor = new Tsl2561();
 
 var WebSocket = require('ws');
 
-var ws = new WebSocket("ws://192.168.0.224:8080");
+// TODO: Fetch this JWT automatically
+var ws = new WebSocket("ws://192.168.0.224:8080", {
+    headers: {
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZWIwNTE5YTAyODhlYTMwZDA0NmEyYTkiLCJ1c2VybmFtZSI6Il" +
+        "pvcGUiLCJlbWFpbCI6InNkZW5vbW1lMTVAZ21haWwuY29tIiwidHlwZSI6MCwicGFzc3dvcmQiOiIkMmEkMTAkNXM2dE12bzYuOVFlQWln" +
+        "SHdBck51T3VPUHFLL2Nyc2FXVjFmR0xPY3R1dW9sc1BMRVBlVS4iLCJjcmVhdGVEYXRlIjoiMjAyMC0wNS0wNFQxNzozMjoxMC41NTBaIi" +
+        "wibGFzdExvZ2luRGF0ZSI6IjIwMjAtMDUtMDRUMTc6MzI6MTAuNTUwWiIsIl9fdiI6MCwiaWF0IjoxNTkxNzI3NjA3LCJleHAiOjE1OTE4" +
+        "MTQwMDd9.blL3bNtqZvAyhGcspk9L-7YPRjTAAdEGT9J8K-1FKe0"
+    }
+});
 
 var dataHandler;
 var relayHandler;
@@ -150,24 +158,28 @@ function AnalyzeRelays() {
             // Get current event, and next event by looking at current time
             // Check every event, if current time is past
             schedule.events.forEach((event, index) => {
-            var nextEvent = schedule.events[(index + 1 < schedule.events.length) ? index + 1 : 0];
-        if (event.triggerTime && nextEvent.triggerTime) {
-            var triggerTime = event.triggerTime.split(":");
+                var nextEvent = schedule.events[(index + 1 < schedule.events.length) ? index + 1 : 0];
+                if (event.triggerTime && nextEvent.triggerTime) {
+                    var triggerTime = event.triggerTime.split(":");
 
-            var triggerTimeHours = parseInt(triggerTime[0]);
-            var triggerTimeMinutes = parseInt(triggerTime[1]);
-            var triggerTimeSeconds = parseInt(triggerTime[2]);
+                    var triggerTimeHours = parseInt(triggerTime[0]);
+                    var triggerTimeMinutes = parseInt(triggerTime[1]);
+                    var triggerTimeSeconds = parseInt(triggerTime[2]);
 
-            console.log('\t' + triggerTimeHours + ":" + triggerTimeMinutes + ':' + triggerTimeSeconds + ' - ' + event.Description);
+                    console.log('\t' + triggerTimeHours + ":" + triggerTimeMinutes + ':' + triggerTimeSeconds + ' - ' + event.Description);
 
-            nodeSchedule.scheduleJob({hour: triggerTimeHours, minute: triggerTimeMinutes, second: triggerTimeSeconds}, function(){
-                console.log(new Date() + ' FIRE JOB: ' + event.status + ' -- ' + event.Description);
-                relays[schedule.type].writeSync(event.status);
-                console.log('Relay Status: ' + relays[schedule.type].readSync());
+                    nodeSchedule.scheduleJob({
+                        hour: triggerTimeHours,
+                        minute: triggerTimeMinutes,
+                        second: triggerTimeSeconds
+                    }, function () {
+                        console.log(new Date() + ' FIRE JOB: ' + event.status + ' -- ' + event.Description);
+                        relays[schedule.type].writeSync(event.status);
+                        console.log('Relay Status: ' + relays[schedule.type].readSync());
+                    });
+                }
             });
-        }
-    });
-    });
+        });
     } else {
         console.log('');
         console.log('Grow config is null for some reason...');
