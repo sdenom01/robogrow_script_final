@@ -22,11 +22,7 @@ var ws = new WebSocket("ws://192.168.0.224:8080", {
         "pvcGUiLCJlbWFpbCI6InNkZW5vbW1lMTVAZ21haWwuY29tIiwidHlwZSI6MCwicGFzc3dvcmQiOiIkMmEkMTAkNXM2dE12bzYuOVFlQWln" +
         "SHdBck51T3VPUHFLL2Nyc2FXVjFmR0xPY3R1dW9sc1BMRVBlVS4iLCJjcmVhdGVEYXRlIjoiMjAyMC0wNS0wNFQxNzozMjoxMC41NTBaIi" +
         "wibGFzdExvZ2luRGF0ZSI6IjIwMjAtMDUtMDRUMTc6MzI6MTAuNTUwWiIsIl9fdiI6MCwiaWF0IjoxNTkxNzI3NjA3LCJleHAiOjE1OTE4" +
-        "MTQwMDd9.blL3bNtqZvAyhGcspk9L-7YPRjTAAdEGT9J8K-1FKe0",
-        user: {
-            email: "sdenomme15@gmail.com",
-            password: "pasteFlux1992"
-        }
+        "MTQwMDd9.blL3bNtqZvAyhGcspk9L-7YPRjTAAdEGT9J8K-1FKe0_ASS"
     }
 });
 
