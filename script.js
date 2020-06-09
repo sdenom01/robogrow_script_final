@@ -73,9 +73,11 @@ function InitializeWebSocket(token) {
     });
 
     ws.on('close', function close() {
-        console.log('Connection broken to server.');
+        console.log('Connection broken to server... Attempting to re-open connection in 5 seconds.');
         console.log('Turning off green connectivity LED.');
         connectedGreenLED.writeSync(0);
+
+        setTimeout(InitializeWebSocket, 5000);
 
         console.log('Stopping data send handler.');
         clearInterval(dataHandler);
