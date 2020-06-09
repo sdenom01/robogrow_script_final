@@ -2,8 +2,8 @@
   "name": "robogrow_script_final",
   "version": "0.0.1",
   "dependencies": {
-    "ada-tsl2561": "^1.0.0",
     "i2c-bus": "^5.2.0",
+    "ada-tsl2561": "^1.0.0",
     "node-dht-sensor": "^0.4.2",
     "node-fetch": "^2.6.0",
     "node-schedule": "^1.3.2",
