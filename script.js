@@ -33,7 +33,8 @@ function AttemptToAuthenticate() {
             "email": "sdenomme15@gmail.com",
             "password": "pasteFlux1992"
         }
-    }).then(res => res.json())
+    })
+        .then(res => res.json())
         .then(json => {
             if (json) {
                 console.log(json);
@@ -45,6 +46,9 @@ function AttemptToAuthenticate() {
 
                 setTimeout(AttemptToAuthenticate(), 5000);
             }
+        })
+        .catch(err => {
+            console.log("err:" + JSON.stringify(err));
         });
 }
 
