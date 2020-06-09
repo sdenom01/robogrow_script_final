@@ -37,7 +37,9 @@ function AttemptToAuthenticate() {
         .then(json => {
             if (json) {
                 console.log(json);
-                InitializeWebSocket(json);
+                var token = json.token;
+
+                InitializeWebSocket(token);
             } else {
                 console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
 
@@ -48,14 +50,12 @@ function AttemptToAuthenticate() {
 
 AttemptToAuthenticate();
 
-
-
-function InitializeWebSocket() {
+function InitializeWebSocket(token) {
     console.log("Initializing Websocket");
 
     var ws = new WebSocket("ws://192.168.0.224:8080", {
         headers: {
-            token: json.token
+            token: token
         }
     });
 
