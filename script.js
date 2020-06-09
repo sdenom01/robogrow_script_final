@@ -61,11 +61,13 @@ function AttemptToAuthenticate() {
 
 AttemptToAuthenticate();
 
+var ws;
+
 function InitializeWebSocket() {
     console.log("Initializing Websocket...");
 
     if (token) {
-        var ws = new WebSocket("ws://192.168.0.224:8080", {
+        ws = new WebSocket("ws://192.168.0.224:8080", {
             headers: {
                 token: token
             }
