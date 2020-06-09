@@ -82,6 +82,7 @@ function InitializeWebSocket() {
         ws.on('close', function close() {
             console.log('Connection broken to server... Attempting to re-open connection in 5 seconds.');
             console.log('Turning off green connectivity LED.');
+            console.log('');
             connectedGreenLED.writeSync(0);
 
             setTimeout(AttemptToAuthenticate, 5000);
@@ -193,7 +194,7 @@ var nodeSchedule = require('node-schedule');
 
 // Check if a relay needs to be turned on or off
 function AnalyzeRelays() {
-    console.log('\tScheduling relay events...');
+    console.log('Scheduling relay events...');
 
     if (currentGrowConfig && currentGrowConfig.relaySchedules) {
         var relaySchedules = currentGrowConfig.relaySchedules;
@@ -210,7 +211,7 @@ function AnalyzeRelays() {
                     var triggerTimeMinutes = parseInt(triggerTime[1]);
                     var triggerTimeSeconds = parseInt(triggerTime[2]);
 
-                    console.log('\t' + triggerTimeHours + ":" + triggerTimeMinutes + ':' + triggerTimeSeconds + ' - ' + event.Description);
+                    console.log('' + triggerTimeHours + ":" + triggerTimeMinutes + ':' + triggerTimeSeconds + ' - ' + event.Description);
 
                     nodeSchedule.scheduleJob({
                         hour: triggerTimeHours,
