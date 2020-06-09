@@ -53,7 +53,9 @@ function AttemptToAuthenticate() {
             }
         })
         .catch(err => {
-            console.log("err:" + JSON.stringify(err));
+            console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
+
+            setTimeout(AttemptToAuthenticate, 5000);
         });
 }
 
