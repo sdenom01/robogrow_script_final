@@ -28,13 +28,16 @@ var currentGrow;
 var currentGrowConfig;
 
 function AttemptToAuthenticate() {
-    fetch('http://192.168.0.224:3000/authenticate', {
+    const requestOptions = {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "email": "sdenomme15@gmail.com",
             "password": "pasteFlux1992"
         })
-    })
+    };
+
+    fetch('http://192.168.0.224:3000/authenticate', requestOptions)
         .then(res => res.json())
         .then(json => {
             if (!json.errors) {
