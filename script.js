@@ -1,9 +1,14 @@
-const gpio = require('onoff').Gpio;
+const fetch = require('node-fetch');
 
+const gpio = require('onoff').Gpio;
 const connectedGreenLED = new gpio(16, 'out');
 const tempGreenLED = new gpio(25, 'out');
 const luxGreenLED = new gpio(24, 'out');
 const blueLED = new gpio(23, 'out');
+const relays = [
+    new gpio(17, 'out'),
+    new gpio(27, 'out')
+];
 
 var raspberryPiId = "robo_001";
 var raspberryPiGrowId = "5e38b4e4d1f93ee2fdf26a31";
@@ -15,16 +20,6 @@ const lumenSensor = new Tsl2561();
 
 var WebSocket = require('ws');
 
-// TODO: Fetch this JWT automatically
-var ws = new WebSocket("ws://192.168.0.224:8080", {
-    headers: {
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZWIwNTE5YTAyODhlYTMwZDA0NmEyYTkiLCJ1c2VybmFtZSI6Il" +
-        "pvcGUiLCJlbWFpbCI6InNkZW5vbW1lMTVAZ21haWwuY29tIiwidHlwZSI6MCwicGFzc3dvcmQiOiIkMmEkMTAkNXM2dE12bzYuOVFlQWln" +
-        "SHdBck51T3VPUHFLL2Nyc2FXVjFmR0xPY3R1dW9sc1BMRVBlVS4iLCJjcmVhdGVEYXRlIjoiMjAyMC0wNS0wNFQxNzozMjoxMC41NTBaIi" +
-        "wibGFzdExvZ2luRGF0ZSI6IjIwMjAtMDUtMDRUMTc6MzI6MTAuNTUwWiIsIl9fdiI6MCwiaWF0IjoxNTkxNzI3NjA3LCJleHAiOjE1OTE4" +
-        "MTQwMDd9.blL3bNtqZvAyhGcspk9L-7YPRjTAAdEGT9J8K-1FKe0"
-    }
-});
 
 var dataHandler;
 var relayHandler;
@@ -32,55 +27,77 @@ var relayHandler;
 var currentGrow;
 var currentGrowConfig;
 
-ws.on('open', function () {
-    console.log('Connection successfully opened to server.');
-    console.log('Turning on green connectivity LED.');
-    connectedGreenLED.writeSync(1);
-});
+fetch('192.168.0.224:3001/authenticate', {
+    method: 'POST', body: {
+        "email": "sdenomme15@gmail.com",
+        "password": "pasteFlux1992"
+    }
+}).then(res => res.json())
+    .then(json => {
+        console.log(json);
+        InitializeWebSocket(json);
+    });
 
-ws.on('close', function close() {
-    console.log('Connection broken to server.');
-    console.log('Turning off green connectivity LED.');
-    connectedGreenLED.writeSync(0);
+function InitializeWebSocket() {
+    console.log("Initializing Websocket");
 
-    console.log('Stopping data send handler.');
-    clearInterval(dataHandler);
-});
+    var ws = new WebSocket("ws://192.168.0.224:8080", {
+        headers: {
+            token: json.token
+        }
+    });
+
+    ws.on('open', function () {
+        console.log('Connection successfully opened to server.');
+        console.log('Turning on green connectivity LED.');
+        connectedGreenLED.writeSync(1);
+    });
+
+    ws.on('close', function close() {
+        console.log('Connection broken to server.');
+        console.log('Turning off green connectivity LED.');
+        connectedGreenLED.writeSync(0);
+
+        console.log('Stopping data send handler.');
+        clearInterval(dataHandler);
+    });
 
 // TODO: Come up with a better way to identify specific events
-ws.on('message', function (data, flags) {
-    if (data) {
-        data = JSON.parse(data);
+    ws.on('message', function (data, flags) {
+        if (data) {
+            data = JSON.parse(data);
 
-        // Is initialization?
-        if (data.initialization) {
-            console.log(data.message);
+            // Is initialization?
+            if (data.initialization) {
+                console.log(data.message);
 
-            console.log("Sending ID's to server, waiting for data send event.");
-            console.log('');
+                console.log("Sending ID's to server, waiting for data send event.");
+                console.log('');
 
-            ws.send(JSON.stringify({
-                growId: raspberryPiGrowId,
-                scriptId: raspberryPiId,
-                identify: true
-            }));
+                ws.send(JSON.stringify({
+                    growId: raspberryPiGrowId,
+                    scriptId: raspberryPiId,
+                    identify: true
+                }));
+            }
+
+            if (data.send) {
+                currentGrow = data.grow;
+                currentGrowConfig = data.config;
+
+                AnalyzeRelays();
+
+                dataHandler = setInterval(AttemptToGetDataFromSensors, 30000);
+            }
+
+            // Is relay manual override?
+            if (data.relayOverride) {
+                // Collect GPIO pin and attempt to turn it on / off
+            }
         }
+    });
 
-        if (data.send) {
-            currentGrow = data.grow;
-            currentGrowConfig = data.config;
-
-            AnalyzeRelays();
-
-            dataHandler = setInterval(AttemptToGetDataFromSensors, 30000);
-        }
-
-        // Is relay manual override?
-        if (data.relayOverride) {
-            // Collect GPIO pin and attempt to turn it on / off
-        }
-    }
-});
+}
 
 async function AttemptToGetDataFromSensors() {
     // TODO: Determine if any relays need to be toggled.
@@ -139,11 +156,6 @@ async function getLumen() {
         lux: lux
     };
 }
-
-const relays = [
-    new gpio(17, 'out'),
-    new gpio(27, 'out')
-];
 
 var nodeSchedule = require('node-schedule');
 
