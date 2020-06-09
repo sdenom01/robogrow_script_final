@@ -27,7 +27,7 @@ var relayHandler;
 var currentGrow;
 var currentGrowConfig;
 
-fetch('192.168.0.224:3001/authenticate', {
+fetch('http://192.168.0.224:3001/authenticate', {
     method: 'POST', body: {
         "email": "sdenomme15@gmail.com",
         "password": "pasteFlux1992"
