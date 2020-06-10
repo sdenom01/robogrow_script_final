@@ -217,7 +217,7 @@ function AnalyzeRelays() {
     if (currentGrowConfig && currentGrowConfig.relaySchedules) {
         var relaySchedules = currentGrowConfig.relaySchedules;
 
-        var table = new AsciiTable('Relay Events'.grey.);
+        var table = new AsciiTable('Relay Events');
 
         // For each schedule
         relaySchedules.forEach((schedule, index) => {
@@ -232,7 +232,7 @@ function AnalyzeRelays() {
                     var triggerTimeMinutes = parseInt(triggerTime[1]);
                     var triggerTimeSeconds = parseInt(triggerTime[2]);
 
-                    table.addRow((pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds)).grey, event.Description.grey);
+                    table.addRow((pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds)), event.Description);
 
                     nodeSchedule.scheduleJob({
                         hour: triggerTimeHours,
@@ -247,7 +247,7 @@ function AnalyzeRelays() {
             });
         });
 
-        console.log(table.toString().grey);
+        console.log(table.toString());
         console.log('');
     } else {
         console.log('');
