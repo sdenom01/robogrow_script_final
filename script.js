@@ -228,7 +228,7 @@ function AnalyzeRelays() {
                     var triggerTimeMinutes = parseInt(triggerTime[1]);
                     var triggerTimeSeconds = parseInt(triggerTime[2]);
 
-                    table.addRow(triggerTimeHours + ":" + triggerTimeMinutes + ':' + triggerTimeSeconds.grey, event.Description.grey);
+                    table.addRow((triggerTimeHours + ":" + triggerTimeMinutes + ':' + triggerTimeSeconds).grey, event.Description.grey);
 
                     nodeSchedule.scheduleJob({
                         hour: triggerTimeHours,
