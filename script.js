@@ -242,8 +242,9 @@ function AnalyzeRelays() {
                 }
             });
         });
-        
-        console.log(table.toString())
+
+        console.log(table.toString());
+        console.log('');
     } else {
         console.log('');
         console.log('Grow config is null for some reason...');
