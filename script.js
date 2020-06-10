@@ -148,6 +148,8 @@ async function AttemptToGetDataFromSensors() {
                 tempGreenLED.writeSync(1);
             }
 
+            console.log("Temp: " + temperature + " Humidity: " + humidity);
+
             getLumen().then(function (luxObj) {
                 if (luxObj && luxObj.broadband) {
                     luxGreenLED.writeSync(1);
