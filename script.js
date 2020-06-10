@@ -10,6 +10,9 @@ const relays = [
     new gpio(27, 'out')
 ];
 
+var colors = require('colors');
+
+
 var raspberryPiId = "robo_001";
 var raspberryPiGrowId = "5e38b4e4d1f93ee2fdf26a31";
 
@@ -19,7 +22,6 @@ const Tsl2561 = require("ada-tsl2561");
 const lumenSensor = new Tsl2561();
 
 var WebSocket = require('ws');
-
 
 var dataHandler;
 var relayHandler;
@@ -204,13 +206,15 @@ async function getLumen() {
 }
 
 var nodeSchedule = require('node-schedule');
+var AsciiTable = require('ascii-table');
 
 // Check if a relay needs to be turned on or off
 function AnalyzeRelays() {
-    console.log('Scheduling relay events...');
-
     if (currentGrowConfig && currentGrowConfig.relaySchedules) {
         var relaySchedules = currentGrowConfig.relaySchedules;
+
+        var table = new AsciiTable('Relay Events');
+
         // For each schedule
         relaySchedules.forEach((schedule, index) => {
             // Get current event, and next event by looking at current time
@@ -224,7 +228,7 @@ function AnalyzeRelays() {
                     var triggerTimeMinutes = parseInt(triggerTime[1]);
                     var triggerTimeSeconds = parseInt(triggerTime[2]);
 
-                    console.log('' + triggerTimeHours + ":" + triggerTimeMinutes + ':' + triggerTimeSeconds + ' - ' + event.Description);
+                    table.addRow(triggerTimeHours + ":" + triggerTimeMinutes + ':' + triggerTimeSeconds, event.Description);
 
                     nodeSchedule.scheduleJob({
                         hour: triggerTimeHours,
