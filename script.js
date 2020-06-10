@@ -165,9 +165,9 @@ async function AttemptToGetDataFromSensors() {
                 ws.send(JSON.stringify({
                     growId: raspberryPiGrowId,
                     temp: fTemp,
-                    humidity: humidity.toFixed(2),
-                    infrared: luxObj.infrared.toFixed(2),
-                    lux: luxObj.lux.toFixed(2),
+                    humidity: (humidity) ? humidity.toFixed(2) : undefined,
+                    infrared: (luxObj ? luxObj.infrared.toFixed(2)  : undefined,
+                    lux: (luxObj) ? luxObj.lux.toFixed(2) : undefined,
                     createGrowEvent: true
                 }));
 
