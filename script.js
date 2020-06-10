@@ -213,7 +213,7 @@ function AnalyzeRelays() {
     if (currentGrowConfig && currentGrowConfig.relaySchedules) {
         var relaySchedules = currentGrowConfig.relaySchedules;
 
-        var table = new AsciiTable('Relay Events'.grey);
+        var table = new AsciiTable('Relay Events'.grey.bold);
 
         // For each schedule
         relaySchedules.forEach((schedule, index) => {
