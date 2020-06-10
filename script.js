@@ -208,12 +208,16 @@ async function getLumen() {
 var nodeSchedule = require('node-schedule');
 var AsciiTable = require('ascii-table');
 
+function pad(n) {
+    return (n < 10) ? ("0" + n) : n;
+}
+
 // Check if a relay needs to be turned on or off
 function AnalyzeRelays() {
     if (currentGrowConfig && currentGrowConfig.relaySchedules) {
         var relaySchedules = currentGrowConfig.relaySchedules;
 
-        var table = new AsciiTable('Relay Events'.grey.bold);
+        var table = new AsciiTable('Relay Events'.grey.);
 
         // For each schedule
         relaySchedules.forEach((schedule, index) => {
@@ -228,7 +232,7 @@ function AnalyzeRelays() {
                     var triggerTimeMinutes = parseInt(triggerTime[1]);
                     var triggerTimeSeconds = parseInt(triggerTime[2]);
 
-                    table.addRow((triggerTimeHours + ":" + triggerTimeMinutes + ':' + triggerTimeSeconds).grey, event.Description.grey);
+                    table.addRow((pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds)).grey, event.Description.grey);
 
                     nodeSchedule.scheduleJob({
                         hour: triggerTimeHours,
