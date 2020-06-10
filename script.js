@@ -135,6 +135,8 @@ function InitializeWebSocket() {
 async function AttemptToGetDataFromSensors() {
     // TODO: Determine if any relays need to be toggled.
 
+    console.log("Attempting to get temperature / humidity ...");
+
     tempSensor.read(22, 4, function (err, temperature, humidity) {
         if (!err) {
             var cTemp = temperature;
@@ -167,6 +169,8 @@ async function AttemptToGetDataFromSensors() {
                 tempGreenLED.writeSync(0);
                 blueLED.writeSync(0);
             });
+        } else {
+            console.log(err);
         }
     });
 }
