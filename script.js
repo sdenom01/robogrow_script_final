@@ -166,8 +166,8 @@ async function AttemptToGetDataFromSensors() {
                     growId: raspberryPiGrowId,
                     temp: fTemp,
                     humidity: (humidity) ? humidity.toFixed(2) : undefined,
-                    infrared: (luxObj) ? luxObj.infrared.toFixed(2)  : undefined,
-                    lux: (luxObj) ? luxObj.lux.toFixed(2) : undefined,
+                    infrared: (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2)  : undefined,
+                    lux: (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined,
                     createGrowEvent: true
                 }));
 
