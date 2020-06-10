@@ -111,6 +111,8 @@ function InitializeWebSocket() {
                 }
 
                 if (data.send) {
+
+                    console.log("Received trigger for send event... beginning data loop...");
                     currentGrow = data.grow;
                     currentGrowConfig = data.config;
 
