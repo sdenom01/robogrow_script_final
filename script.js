@@ -173,6 +173,7 @@ async function AttemptToGetDataFromSensors() {
                     humidity: humidity,
                     infrared: infrared,
                     lux: lux,
+                    config: currentGrowConfig,
                     createGrowEvent: true
                 }));
 
