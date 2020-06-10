@@ -141,7 +141,6 @@ async function AttemptToGetDataFromSensors() {
     console.log("Attempting to get temperature / humidity ...");
 
     tempSensor.read(22, 4, function (err, temperature, humidity) {
-        console.log("errors? " + JSON.stringify(err));
         if (!err) {
             var cTemp = temperature;
             var fTemp = (cTemp * 9 / 5 + 32).toFixed(2);
@@ -149,6 +148,8 @@ async function AttemptToGetDataFromSensors() {
             if (fTemp && fTemp != 0.0) {
                 tempGreenLED.writeSync(1);
             }
+
+            humidity = (humidity) ? humidity.toFixed(2) : undefined;
 
             console.log("Temp: " + temperature + " Humidity: " + humidity);
 
@@ -159,15 +160,20 @@ async function AttemptToGetDataFromSensors() {
 
                 blueLED.writeSync(1);
 
-                console.log("");
+                var infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2)  : undefined;
+                var lux = (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined;
+
+                console.log("Infrared: " + infrared+ " Lux: " + lux);
+
                 console.log("Sending sensor data now.");
+                console.log("");
 
                 ws.send(JSON.stringify({
                     growId: raspberryPiGrowId,
                     temp: fTemp,
-                    humidity: (humidity) ? humidity.toFixed(2) : undefined,
-                    infrared: (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2)  : undefined,
-                    lux: (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined,
+                    humidity: humidity,
+                    infrared: infrared,
+                    lux: lux,
                     createGrowEvent: true
                 }));
 
