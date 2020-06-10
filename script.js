@@ -243,7 +243,7 @@ function AnalyzeRelays() {
             });
         });
 
-        console.log(table.toString());
+        console.log(table.toString().grey);
         console.log('');
     } else {
         console.log('');
