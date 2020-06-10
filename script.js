@@ -113,6 +113,7 @@ function InitializeWebSocket() {
                 if (data.send) {
 
                     console.log("Received trigger for send event... beginning data loop...");
+                    console.log('');
                     currentGrow = data.grow;
                     currentGrowConfig = data.config;
 
@@ -140,6 +141,7 @@ async function AttemptToGetDataFromSensors() {
     console.log("Attempting to get temperature / humidity ...");
 
     tempSensor.read(22, 4, function (err, temperature, humidity) {
+        console.log("errors? " + JSON.stringify(err));
         if (!err) {
             var cTemp = temperature;
             var fTemp = (cTemp * 9 / 5 + 32).toFixed(2);
