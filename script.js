@@ -64,6 +64,7 @@ function AttemptToAuthenticate() {
 AttemptToAuthenticate();
 
 var ws;
+var relaysAreInitialized = false;
 
 function InitializeWebSocket() {
     console.log("Initializing Websocket...");
@@ -119,7 +120,12 @@ function InitializeWebSocket() {
                     currentGrow = data.grow;
                     currentGrowConfig = data.config;
 
-                    AnalyzeRelays();
+                    // Only run this if needed
+                    if (!relaysAreInitialized) {
+                        ScheduleRelays();
+                    } else {
+                        console.log("Relays have already been initialized. :D");
+                    }
 
                     // Set sensor data loop
                     dataHandler = setInterval(AttemptToGetDataFromSensors, 30000);
@@ -214,7 +220,7 @@ function pad(n) {
 }
 
 // Check if a relay needs to be turned on or off
-function AnalyzeRelays() {
+function ScheduleRelays() {
     if (currentGrowConfig && currentGrowConfig.relaySchedules) {
         var relaySchedules = currentGrowConfig.relaySchedules;
 
@@ -247,6 +253,8 @@ function AnalyzeRelays() {
                 }
             });
         });
+
+        relaysAreInitialized = true;
 
         console.log(table.toString());
         console.log('');
