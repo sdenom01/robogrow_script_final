@@ -41,7 +41,7 @@ function AttemptToAuthenticate() {
         })
     };
 
-    fetch('http://204.48.25.187:3000/authenticate', requestOptions)
+    fetch('http://204.48.25.187/authenticate', requestOptions)
         .then(res => res.json())
         .then(json => {
             if (!json.errors) {
@@ -70,7 +70,7 @@ function InitializeWebSocket() {
     console.log("Initializing Websocket...");
 
     if (token) {
-        ws = new WebSocket("ws://204.48.25.187:3000", {
+        ws = new WebSocket("ws://204.48.25.187", {
             headers: {
                 token: token
             }
