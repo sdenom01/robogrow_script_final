@@ -69,7 +69,7 @@ function InitializeWebSocket() {
     console.log("Initializing Websocket...");
 
     if (token) {
-        ws = new WebSocket("ws://192.168.0.224:8080", {
+        ws = new WebSocket("ws://192.168.0.224:3000", {
             headers: {
                 token: token
             }
