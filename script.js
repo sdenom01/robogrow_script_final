@@ -292,8 +292,8 @@ function ScheduleRelays() {
 }
 
 function DetermineRequiredRelayStatus(relay, currentEvent) {
-    console.log("Checking to make sure relay " + relay.gpio + " status is correct...");
-
-    console.log("Setting " + relay.gpio + " to " + currentEvent.status);
+    console.log("Currently: "+ relay.readSync());
+    console.log("Setting " + JSON.stringify(relay) + " to " + currentEvent.status);
     relay.writeSync(currentEvent.status);
+    console.log("Currently: "+ relay.readSync());
 }
