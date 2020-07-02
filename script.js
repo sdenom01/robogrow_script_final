@@ -247,7 +247,7 @@ function ScheduleRelays() {
                     // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
                     nextDate = nextDate.add(24, 'hours');
                     console.log("Current event is today..." + curDate.format('YYYY-MM-DD hh:mm:ss'));
-                    console.log("Next event is tomorrow..." + nextDate.format('YYYY-MM-DD hh:mm:ss));
+                    console.log("Next event is tomorrow..." + nextDate.format('YYYY-MM-DD hh:mm:ss'));
                 }
 
                 if (event.triggerTime && nextEvent.triggerTime) {
