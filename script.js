@@ -228,10 +228,19 @@ function ScheduleRelays() {
 
         // For each schedule
         relaySchedules.forEach((schedule, index) => {
+            let currentEvent;
+
             // Get current event, and next event by looking at current time
             // Check every event, if current time is past
             schedule.events.forEach((event, index) => {
-                var nextEvent = schedule.events[(index + 1 < schedule.events.length) ? index + 1 : 0];
+                let isToday = (index + 1 < schedule.events.length);
+                var nextEvent = schedule.events[isToday ? index + 1 : 0];
+
+                if (!isToday) {
+                    // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
+                    console.log("Tomorrow..." + JSON.stringify(nextEvent));
+                }
+
                 if (event.triggerTime && nextEvent.triggerTime) {
                     var triggerTime = event.triggerTime.split(":");
 
@@ -252,6 +261,12 @@ function ScheduleRelays() {
                     });
                 }
             });
+
+            if (currentEvent) {
+                // Associate relay GPIO with schedule id
+                let associatedRelay = relays[index];
+                DetermineRequiredRelayStatus(associatedRelay,);
+            }
         });
 
         relaysAreInitialized = true;
@@ -263,4 +278,10 @@ function ScheduleRelays() {
         console.log('Grow config is null for some reason...');
         console.log('');
     }
+}
+
+function DetermineRequiredRelayStatus(relay, currentEvent) {
+    console.log("Checking to make sure relay " + relay.gpio + " status is correct...");
+
+    // check 'current event' status
 }
