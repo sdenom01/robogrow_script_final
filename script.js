@@ -1,5 +1,7 @@
 const fetch = require('node-fetch');
 
+const moment = require('moment');
+
 const gpio = require('onoff').Gpio;
 const connectedGreenLED = new gpio(16, 'out');
 const tempGreenLED = new gpio(25, 'out');
@@ -236,12 +238,13 @@ function ScheduleRelays() {
                 let isToday = (index + 1 < schedule.events.length);
                 var nextEvent = schedule.events[isToday ? index + 1 : 0];
 
-                var curDate = new Date(schedule.events[index]);
-                var nextDate = new Date(nextEvent.triggerTime);
+
+                var curDate = moment(schedule.events[index], 'HH:mm:ss');
+                var nextDate = moment(nextEvent.triggerTime, 'HH:mm:ss');
 
                 if (!isToday) {
                     // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
-                    nextDate = nextDate.getTime() + 60 * 60 * 24 * 1000;
+                    nextDate = nextDate.add(24, 'hours');
                     console.log("Current event is today..." + curDate);
                     console.log("Next event is tomorrow..." + nextDate);
                 }
