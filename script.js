@@ -248,6 +248,10 @@ function ScheduleRelays() {
                     console.log("Next event is tomorrow..." + nextDate.format('YYYY-MM-DD HH:mm:ss'));
                 }
 
+                if (moment().isBetween(curDate, nextDate)) {
+                    currentEvent = event;
+                }
+
                 if (event.triggerTime && nextEvent.triggerTime) {
                     var triggerTime = event.triggerTime.split(":");
 
@@ -272,7 +276,7 @@ function ScheduleRelays() {
             if (currentEvent) {
                 // Associate relay GPIO with schedule id
                 let associatedRelay = relays[index];
-                DetermineRequiredRelayStatus(associatedRelay,);
+                DetermineRequiredRelayStatus(associatedRelay, currentEvent);
             }
         });
 
@@ -290,5 +294,6 @@ function ScheduleRelays() {
 function DetermineRequiredRelayStatus(relay, currentEvent) {
     console.log("Checking to make sure relay " + relay.gpio + " status is correct...");
 
-    // check 'current event' status
+    console.log("Setting " + relay.gpio + " to " + currentEvent.status);
+    relay.writeSync(currentEvent.status);
 }
