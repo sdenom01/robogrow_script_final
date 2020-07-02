@@ -238,6 +238,7 @@ function ScheduleRelays() {
                 let isToday = (index + 1 < schedule.events.length);
                 var nextEvent = schedule.events[isToday ? index + 1 : 0];
 
+                console.log("curEvent: " + schedule.events[index]);
 
                 var curDate = moment(schedule.events[index], 'HH:mm:ss');
                 var nextDate = moment(nextEvent.triggerTime, 'HH:mm:ss');
