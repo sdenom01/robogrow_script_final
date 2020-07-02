@@ -34,7 +34,7 @@ var token;
 function AttemptToAuthenticate() {
     const requestOptions = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             "email": "sdenomme15@gmail.com",
             "password": "pasteFlux1992"
@@ -165,10 +165,10 @@ async function AttemptToGetDataFromSensors() {
 
                 blueLED.writeSync(1);
 
-                var infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2)  : undefined;
+                var infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2) : undefined;
                 var lux = (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined;
 
-                console.log("Infrared: " + infrared+ " Lux: " + lux);
+                console.log("Infrared: " + infrared + " Lux: " + lux);
 
                 console.log("Sending sensor data now.");
                 console.log("");
@@ -236,9 +236,14 @@ function ScheduleRelays() {
                 let isToday = (index + 1 < schedule.events.length);
                 var nextEvent = schedule.events[isToday ? index + 1 : 0];
 
+                var curDate = new Date(schedule.events[index]);
+                var nextDate = new Date(nextEvent.triggerTime);
+
                 if (!isToday) {
                     // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
-                    console.log("Tomorrow..." + JSON.stringify(nextEvent));
+                    nextDate = nextDate.getTime() + 60 * 60 * 24 * 1000;
+                    console.log("Current event is today..." + JSON.stringify(curDate));
+                    console.log("Next event is tomorrow..." + JSON.stringify(nextDate));
                 }
 
                 if (event.triggerTime && nextEvent.triggerTime) {
