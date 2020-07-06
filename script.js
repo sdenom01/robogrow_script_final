@@ -232,7 +232,7 @@ function pad(n) {
     return (n < 10) ? ("0" + n) : n;
 }
 
-const relayJobs = [];
+let relayJobs = [];
 
 // Check if a relay needs to be turned on or off
 function ScheduleRelays() {
