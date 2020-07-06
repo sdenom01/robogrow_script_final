@@ -158,7 +158,7 @@ async function AttemptToGetDataFromSensors() {
 
             humidity = (humidity) ? humidity.toFixed(2) : undefined;
 
-            console.log("Temp: " + temperature + " Humidity: " + humidity);
+            console.log("Temp: " + fTemp + " Humidity: " + humidity);
 
             getLumen().then(function (luxObj) {
                 if (luxObj && luxObj.broadband) {
@@ -293,7 +293,7 @@ function ScheduleRelays() {
 
 function DetermineRequiredRelayStatus(relay, currentEvent) {
     console.log("Currently: "+ relay.readSync());
-    console.log("Setting " + JSON.stringify(relay) + " to " + currentEvent.status);
+    console.log("Setting " + relay_gpio + " to " + currentEvent.status);
     relay.writeSync(currentEvent.status);
     console.log("Currently: "+ relay.readSync());
 }
