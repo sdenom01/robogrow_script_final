@@ -318,8 +318,8 @@ function ScheduleRelays() {
 }
 
 function DetermineRequiredRelayStatus(relay, currentEvent) {
-    console.log("Currently: " + relay.readSync());
-    console.log("Setting " + relay._gpio + " to " + currentEvent.status);
-    relay.writeSync(currentEvent.status);
-    console.log("Currently: " + relay.readSync());
+    if (relay.readSync() !== currentEvent.status) {
+        console.log("Setting " + relay._gpio + " to " + currentEvent.status);
+        relay.writeSync(currentEvent.status);
+    }
 }
