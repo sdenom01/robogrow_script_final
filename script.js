@@ -143,12 +143,7 @@ function InitializeWebSocket() {
                     console.log(data.message);
 
                     currentGrowConfig = data.config;
-                    // Only run this if needed
-                    if (!relaysAreInitialized) {
-                        ScheduleRelays();
-                    } else {
-                        console.log("Relays have already been initialized. :D");
-                    }
+                    ScheduleRelays();
 
                     // Set sensor data loop
                     dataHandler = setInterval(AttemptToGetDataFromSensors, 30000);
@@ -321,8 +316,8 @@ function ScheduleRelays() {
 }
 
 function DetermineRequiredRelayStatus(relay, currentEvent) {
-    console.log("Currently: "+ relay.readSync());
+    console.log("Currently: " + relay.readSync());
     console.log("Setting " + relay._gpio + " to " + currentEvent.status);
     relay.writeSync(currentEvent.status);
-    console.log("Currently: "+ relay.readSync());
+    console.log("Currently: " + relay.readSync());
 }
