@@ -17,6 +17,7 @@ var colors = require('colors');
 
 var raspberryPiId = "robo_001";
 var raspberryPiGrowId = "5eea4ad24c64f83478b99288";
+var raspberryPiGrowConfigId = "5eea4b705f99f8370cc9e126";
 
 var tempSensor = require("node-dht-sensor");
 
@@ -96,7 +97,6 @@ function InitializeWebSocket() {
             clearInterval(dataHandler);
         });
 
-// TODO: Come up with a better way to identify specific events
         ws.on('message', function (data, flags) {
             if (data) {
                 data = JSON.parse(data);
@@ -110,13 +110,13 @@ function InitializeWebSocket() {
 
                     ws.send(JSON.stringify({
                         growId: raspberryPiGrowId,
+                        configId: raspberryPiGrowConfigId,
                         scriptId: raspberryPiId,
                         identify: true
                     }));
                 }
 
                 if (data.send) {
-
                     console.log("Received trigger for send event... beginning data loop...");
                     console.log('');
                     currentGrow = data.grow;
@@ -136,6 +136,22 @@ function InitializeWebSocket() {
                 // Is relay manual override?
                 if (data.relayOverride) {
                     // Collect GPIO pin and attempt to turn it on / off
+                }
+
+                if (data.updateConfig) {
+                    // Refresh config data and re-initialize
+                    console.log(data.message);
+
+                    currentGrowConfig = data.config;
+                    // Only run this if needed
+                    if (!relaysAreInitialized) {
+                        ScheduleRelays();
+                    } else {
+                        console.log("Relays have already been initialized. :D");
+                    }
+
+                    // Set sensor data loop
+                    dataHandler = setInterval(AttemptToGetDataFromSensors, 30000);
                 }
             }
         });
@@ -221,9 +237,21 @@ function pad(n) {
     return (n < 10) ? ("0" + n) : n;
 }
 
+const relayJobs = [];
+
 // Check if a relay needs to be turned on or off
 function ScheduleRelays() {
     if (currentGrowConfig && currentGrowConfig.relaySchedules) {
+
+        if (relayJobs.length > 0) {
+            console.log("Clearing existing jobs...");
+            relayJobs.forEach((job) => {
+                console.log("Clearing job: " + JSON.stringify(job));
+                
+                job.cancel();
+            })
+        }
+
         var relaySchedules = currentGrowConfig.relaySchedules;
 
         var table = new AsciiTable('Relay Events');
@@ -261,7 +289,7 @@ function ScheduleRelays() {
 
                     table.addRow((pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds)), event.Description);
 
-                    nodeSchedule.scheduleJob({
+                    var j = nodeSchedule.scheduleJob({
                         hour: triggerTimeHours,
                         minute: triggerTimeMinutes,
                         second: triggerTimeSeconds
@@ -270,6 +298,8 @@ function ScheduleRelays() {
                         relays[schedule.type].writeSync(event.status);
                         console.log('Relay Status: ' + relays[schedule.type].readSync());
                     });
+
+                    relayJobs.push(j);
                 }
             });
 
