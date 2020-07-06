@@ -242,12 +242,11 @@ const relayJobs = [];
 // Check if a relay needs to be turned on or off
 function ScheduleRelays() {
     if (currentGrowConfig && currentGrowConfig.relaySchedules) {
-
         if (relayJobs.length > 0) {
             console.log("Clearing existing jobs...");
             relayJobs.forEach((job) => {
                 console.log("Clearing job: " + JSON.stringify(job));
-                
+
                 job.cancel();
             })
         }
