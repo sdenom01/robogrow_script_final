@@ -243,7 +243,9 @@ function ScheduleRelays() {
                 console.log("Clearing job: " + JSON.stringify(job));
 
                 job.cancel();
-            })
+            });
+
+            relayJobs = [];
         }
 
         var relaySchedules = currentGrowConfig.relaySchedules;
