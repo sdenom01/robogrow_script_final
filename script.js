@@ -130,7 +130,7 @@ function InitializeWebSocket() {
                     }
 
                     // Set sensor data loop
-                    dataHandler = setInterval(AttemptToGetDataFromSensors, 30000);
+                    dataHandler = setInterval(AttemptToGetDataFromSensors, 60000 * 10); // 10 minutes
                 }
 
                 // Is relay manual override?
