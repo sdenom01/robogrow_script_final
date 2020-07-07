@@ -129,8 +129,10 @@ function InitializeWebSocket() {
                         console.log("Relays have already been initialized. :D");
                     }
 
+                    let interval = 1000 * 60 * 10; // 10 minutes
+
                     // Set sensor data loop
-                    dataHandler = setInterval(AttemptToGetDataFromSensors, 60000 * 10); // 10 minutes
+                    dataHandler = setInterval(AttemptToGetDataFromSensors, interval); // 10 minutes
                 }
 
                 // Is relay manual override?
