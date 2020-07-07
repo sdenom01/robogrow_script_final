@@ -131,6 +131,8 @@ function InitializeWebSocket() {
 
                     let interval = 1000 * 60 * 10; // 10 minutes
 
+                    console.log("Setting data report interval " + (interval / 60000) + " minutes");
+
                     // Set sensor data loop
                     dataHandler = setInterval(AttemptToGetDataFromSensors, interval); // 10 minutes
                 }
