@@ -144,9 +144,6 @@ function InitializeWebSocket() {
 
                     currentGrowConfig = data.config;
                     ScheduleRelays();
-
-                    // Set sensor data loop
-                    dataHandler = setInterval(AttemptToGetDataFromSensors, 30000);
                 }
             }
         });
