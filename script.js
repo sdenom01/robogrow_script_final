@@ -27,12 +27,15 @@ const lumenSensor = new Tsl2561();
 var WebSocket = require('ws');
 
 var dataHandler;
+var noSleepHandler;
 var relayHandler;
 
 var currentGrow;
 var currentGrowConfig;
 
 var token;
+
+AttemptToAuthenticate();
 
 function AttemptToAuthenticate() {
     const requestOptions = {
@@ -63,8 +66,6 @@ function AttemptToAuthenticate() {
             setTimeout(AttemptToAuthenticate, 5000);
         });
 }
-
-AttemptToAuthenticate();
 
 var ws;
 var relaysAreInitialized = false;
@@ -129,11 +130,14 @@ function InitializeWebSocket() {
                         console.log("Relays have already been initialized. :D");
                     }
 
-                    let interval = 1000 * 60 * 10; // 10 minutes
+                    var minutes = 10;
+                    var interval = minutes * 60 * 1000;
+                    var noSleepInterval = 59 * 1000; // 59 seconds (socket timeout is 60 seconds)
 
-                    console.log("Setting data report interval " + (interval / 60000) + " minutes");
+                    console.log("Setting data report interval " + minutes + " minutes");
 
                     // Set sensor data loop
+                    noSleepHandler = setInterval(SendNoSleepPacket, noSleepInterval); // 10 minutes
                     dataHandler = setInterval(AttemptToGetDataFromSensors, interval); // 10 minutes
                 }
 
@@ -144,7 +148,7 @@ function InitializeWebSocket() {
 
                 if (data.updateConfig) {
                     // Refresh config data and re-initialize
-                    console.log(data.message);
+                    console.log("Update Config Event Received.");
 
                     currentGrowConfig = data.config;
                     ScheduleRelays();
@@ -155,6 +159,12 @@ function InitializeWebSocket() {
         // NO TOKEN
         console.log("NO TOKEN??");
     }
+}
+
+async function SendNoSleepPacket() {
+    ws.send(JSON.stringify({
+        message: "No Sleep!"
+    }));
 }
 
 async function AttemptToGetDataFromSensors() {
