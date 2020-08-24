@@ -14,6 +14,7 @@ const relays = [
 
 var colors = require('colors');
 
+var v4l2camera = require("v4l2camera");
 
 var raspberryPiId = "robo_001";
 var raspberryPiGrowId = "5eea4ad24c64f83478b99288";
@@ -47,7 +48,7 @@ function AttemptToAuthenticate() {
         })
     };
 
-    fetch('http://204.48.25.187/authenticate', requestOptions)
+    fetch('https://204.48.25.187/authenticate', requestOptions)
         .then(res => res.json())
         .then(json => {
             if (!json.errors) {
@@ -182,6 +183,9 @@ async function AttemptToGetDataFromSensors() {
 
             console.log("Temp: " + fTemp + " Humidity: " + humidity);
 
+
+            navigator.mediaDevices.getUserMedia({video: {width: 426, height: 240}}).then((stream) => video.srcObject = stream);
+
             getLumen().then(function (luxObj) {
                 if (luxObj && luxObj.broadband) {
                     luxGreenLED.writeSync(1);
@@ -194,22 +198,58 @@ async function AttemptToGetDataFromSensors() {
 
                 console.log("Infrared: " + infrared + " Lux: " + lux);
 
-                console.log("Sending sensor data now.");
-                console.log("");
+                var gotCam = true;
+                var cam = new v4l2camera.Camera("/dev/video0");
+                if (cam.configGet().formatName !== "MJPG") {
+                    console.log("NOTICE: MJPG camera required");
+                    gotCam = false;
+                }
 
-                ws.send(JSON.stringify({
-                    growId: raspberryPiGrowId,
-                    temp: fTemp,
-                    humidity: humidity,
-                    infrared: infrared,
-                    lux: lux,
-                    config: currentGrowConfig,
-                    createGrowEvent: true
-                }));
+                if (gotCam) {
+                    // Capture image buffer and send
+                    cam.start();
+                    cam.capture(function (success) {
+                        var frame = cam.frameRaw();
 
-                luxGreenLED.writeSync(0);
-                tempGreenLED.writeSync(0);
-                blueLED.writeSync(0);
+                        console.log("Sending sensor data now.");
+                        console.log("");
+
+                        ws.send(JSON.stringify({
+                            growId: raspberryPiGrowId,
+                            temp: fTemp,
+                            humidity: humidity,
+                            infrared: infrared,
+                            lux: lux,
+                            config: currentGrowConfig,
+                            createGrowEvent: true,
+                            frame: frame
+                        }));
+
+                        luxGreenLED.writeSync(0);
+                        tempGreenLED.writeSync(0);
+                        blueLED.writeSync(0);
+
+                        cam.stop();
+                    });
+                } else {
+                    // Send without image
+                    console.log("Sending sensor data now.");
+                    console.log("");
+
+                    ws.send(JSON.stringify({
+                        growId: raspberryPiGrowId,
+                        temp: fTemp,
+                        humidity: humidity,
+                        infrared: infrared,
+                        lux: lux,
+                        config: currentGrowConfig,
+                        createGrowEvent: true
+                    }));
+
+                    luxGreenLED.writeSync(0);
+                    tempGreenLED.writeSync(0);
+                    blueLED.writeSync(0);
+                }
             });
         } else {
             console.log(err);
@@ -259,6 +299,8 @@ function ScheduleRelays() {
             relayJobs = [];
         }
 
+
+        // Relays
         var relaySchedules = currentGrowConfig.relaySchedules;
 
         var table = new AsciiTable('Relay Events');
