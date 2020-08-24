@@ -48,7 +48,7 @@ function AttemptToAuthenticate() {
         })
     };
 
-    fetch('https://204.48.25.187/authenticate', requestOptions)
+    fetch('https://api.robogrow.io/authenticate', requestOptions)
         .then(res => res.json())
         .then(json => {
             if (!json.errors) {
@@ -75,7 +75,7 @@ function InitializeWebSocket() {
     console.log("Initializing Websocket...");
 
     if (token) {
-        ws = new WebSocket("ws://204.48.25.187", {
+        ws = new WebSocket("ws://api.robogrow.io", {
             headers: {
                 token: token
             }
