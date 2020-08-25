@@ -14,7 +14,7 @@ const relays = [
 
 var colors = require('colors');
 
-var v4l2camera = require("v4l2camera");
+// var v4l2camera = require("v4l2camera");
 
 var raspberryPiId = "robo_001";
 var raspberryPiGrowId = "5eea4ad24c64f83478b99288";
