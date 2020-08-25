@@ -184,7 +184,12 @@ async function AttemptToGetDataFromSensors() {
             console.log("Temp: " + fTemp + " Humidity: " + humidity);
 
 
-            navigator.mediaDevices.getUserMedia({video: {width: 426, height: 240}}).then((stream) => video.srcObject = stream);
+            // navigator.mediaDevices.getUserMedia({
+            //     video: {
+            //         width: 426,
+            //         height: 240
+            //     }
+            // }).then((stream) => video.srcObject = stream);
 
             getLumen().then(function (luxObj) {
                 if (luxObj && luxObj.broadband) {
@@ -232,23 +237,23 @@ async function AttemptToGetDataFromSensors() {
                 //         cam.stop();
                 //     });
                 // } else {
-                    // Send without image
-                    console.log("Sending sensor data now.");
-                    console.log("");
+                // Send without image
+                console.log("Sending sensor data now.");
+                console.log("");
 
-                    ws.send(JSON.stringify({
-                        growId: raspberryPiGrowId,
-                        temp: fTemp,
-                        humidity: humidity,
-                        infrared: infrared,
-                        lux: lux,
-                        config: currentGrowConfig,
-                        createGrowEvent: true
-                    }));
+                ws.send(JSON.stringify({
+                    growId: raspberryPiGrowId,
+                    temp: fTemp,
+                    humidity: humidity,
+                    infrared: infrared,
+                    lux: lux,
+                    config: currentGrowConfig,
+                    createGrowEvent: true
+                }));
 
-                    luxGreenLED.writeSync(0);
-                    tempGreenLED.writeSync(0);
-                    blueLED.writeSync(0);
+                luxGreenLED.writeSync(0);
+                tempGreenLED.writeSync(0);
+                blueLED.writeSync(0);
                 // }
             });
         } else {
