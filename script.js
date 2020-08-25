@@ -75,7 +75,7 @@ function InitializeWebSocket() {
     console.log("Initializing Websocket...");
 
     if (token) {
-        ws = new WebSocket("ws://api.robogrow.io", {
+        ws = new WebSocket("wss://api.robogrow.io", undefined, {
             headers: {
                 token: token
             },
