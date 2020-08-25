@@ -198,40 +198,40 @@ async function AttemptToGetDataFromSensors() {
 
                 console.log("Infrared: " + infrared + " Lux: " + lux);
 
-                var gotCam = true;
-                var cam = new v4l2camera.Camera("/dev/video0");
-                if (cam.configGet().formatName !== "MJPG") {
-                    console.log("NOTICE: MJPG camera required");
-                    gotCam = false;
-                }
-
-                if (gotCam) {
-                    // Capture image buffer and send
-                    cam.start();
-                    cam.capture(function (success) {
-                        var frame = cam.frameRaw();
-
-                        console.log("Sending sensor data now.");
-                        console.log("");
-
-                        ws.send(JSON.stringify({
-                            growId: raspberryPiGrowId,
-                            temp: fTemp,
-                            humidity: humidity,
-                            infrared: infrared,
-                            lux: lux,
-                            config: currentGrowConfig,
-                            createGrowEvent: true,
-                            frame: frame
-                        }));
-
-                        luxGreenLED.writeSync(0);
-                        tempGreenLED.writeSync(0);
-                        blueLED.writeSync(0);
-
-                        cam.stop();
-                    });
-                } else {
+                // var gotCam = true;
+                // var cam = new v4l2camera.Camera("/dev/video0");
+                // if (cam.configGet().formatName !== "MJPG") {
+                //     console.log("NOTICE: MJPG camera required");
+                //     gotCam = false;
+                // }
+                //
+                // if (gotCam) {
+                //     // Capture image buffer and send
+                //     cam.start();
+                //     cam.capture(function (success) {
+                //         var frame = cam.frameRaw();
+                //
+                //         console.log("Sending sensor data now.");
+                //         console.log("");
+                //
+                //         ws.send(JSON.stringify({
+                //             growId: raspberryPiGrowId,
+                //             temp: fTemp,
+                //             humidity: humidity,
+                //             infrared: infrared,
+                //             lux: lux,
+                //             config: currentGrowConfig,
+                //             createGrowEvent: true,
+                //             frame: frame
+                //         }));
+                //
+                //         luxGreenLED.writeSync(0);
+                //         tempGreenLED.writeSync(0);
+                //         blueLED.writeSync(0);
+                //
+                //         cam.stop();
+                //     });
+                // } else {
                     // Send without image
                     console.log("Sending sensor data now.");
                     console.log("");
@@ -249,7 +249,7 @@ async function AttemptToGetDataFromSensors() {
                     luxGreenLED.writeSync(0);
                     tempGreenLED.writeSync(0);
                     blueLED.writeSync(0);
-                }
+                // }
             });
         } else {
             console.log(err);
