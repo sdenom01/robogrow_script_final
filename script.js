@@ -78,6 +78,9 @@ function InitializeWebSocket() {
         ws = new WebSocket("ws://api.robogrow.io", {
             headers: {
                 token: token
+            },
+            options: {
+                followRedirects: true
             }
         });
 
