@@ -68,30 +68,32 @@ function AttemptToAuthenticate() {
         });
 }
 
-var ws;
+var wss;
 var relaysAreInitialized = false;
 
 function InitializeWebSocket() {
-    console.log("Initializing Websocket...");
-
     if (token) {
-        ws = new WebSocket("ws://api.robogrow.io", {
+        wss = new WebSocket("wss://api.robogrow.io/", {
             headers: {
                 token: token
             }
+        }, {
+            followRedirects: true
         });
 
-        ws.on('open', function () {
+        console.log("Initializing Websocket... " + wss.url);
+
+        wss.on('open', function () {
             console.log('Connection successfully opened to server.');
             console.log('Turning on green connectivity LED.');
             connectedGreenLED.writeSync(1);
         });
 
-        ws.on('error', function (error) {
+        wss.on('error', function (error) {
             console.log(`WebSocket error: ${error}`)
         });
 
-        ws.on('close', function close() {
+        wss.on('close', function close() {
             console.log('Connection broken to server... Attempting to re-open connection in 5 seconds.');
             console.log('Turning off green connectivity LED.');
             console.log('');
@@ -103,7 +105,7 @@ function InitializeWebSocket() {
             clearInterval(dataHandler);
         });
 
-        ws.on('message', function (data, flags) {
+        wss.on('message', function (data, flags) {
             if (data) {
                 data = JSON.parse(data);
 
@@ -114,7 +116,7 @@ function InitializeWebSocket() {
                     console.log("Sending ID's to server, waiting for data send event.");
                     console.log('');
 
-                    ws.send(JSON.stringify({
+                    wss.send(JSON.stringify({
                         growId: raspberryPiGrowId,
                         configId: raspberryPiGrowConfigId,
                         scriptId: raspberryPiId,
@@ -167,7 +169,7 @@ function InitializeWebSocket() {
 }
 
 async function SendNoSleepPacket() {
-    ws.send(JSON.stringify({
+    wss.send(JSON.stringify({
         message: "No Sleep!"
     }));
 }
@@ -245,7 +247,7 @@ async function AttemptToGetDataFromSensors() {
                 console.log("Sending sensor data now.");
                 console.log("");
 
-                ws.send(JSON.stringify({
+                wss.send(JSON.stringify({
                     growId: raspberryPiGrowId,
                     temp: fTemp,
                     humidity: humidity,
