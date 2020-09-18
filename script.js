@@ -75,12 +75,9 @@ function InitializeWebSocket() {
     console.log("Initializing Websocket...");
 
     if (token) {
-        ws = new WebSocket("ws://api.robogrow.io", undefined, {
+        ws = new WebSocket("ws://api.robogrow.io", {
             headers: {
                 token: token
-            },
-            options: {
-                followRedirects: true
             }
         });
 
@@ -88,6 +85,10 @@ function InitializeWebSocket() {
             console.log('Connection successfully opened to server.');
             console.log('Turning on green connectivity LED.');
             connectedGreenLED.writeSync(1);
+        });
+
+        ws.on('error', function (error) {
+            console.log(`WebSocket error: ${error}`)
         });
 
         ws.on('close', function close() {
