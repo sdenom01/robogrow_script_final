@@ -73,7 +73,7 @@ var relaysAreInitialized = false;
 
 function InitializeWebSocket() {
     if (token) {
-        ws = new WebSocket("ws://api.robogrow.io/socket", {
+        ws = new WebSocket("wss://api.robogrow.io/socket", {
             headers: {
                 token: token
             },
