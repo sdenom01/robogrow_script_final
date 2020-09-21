@@ -262,6 +262,8 @@ async function AttemptToGetDataFromSensors() {
                 tempGreenLED.writeSync(0);
                 blueLED.writeSync(0);
                 // }
+            }).catch((e) => {
+                console.log(e);
             });
         } else {
             console.log(err);
