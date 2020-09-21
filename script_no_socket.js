@@ -71,9 +71,18 @@ function AttemptToAuthenticate() {
 var ws;
 var relaysAreInitialized = false;
 
+function AttemptToSendDataOnceEveryTenMinutes() {
+    var minutes = 10, the_interval = minutes * 60 * 1000;
+
+    setInterval(function() {
+        AttemptToGetDataFromSensors();
+        // do your stuff here
+    }, the_interval);
+}
+
 function InitializeWebSocket() {
     if (token) {
-        ws = new WebSocket("wss://api.robogrow.io", {
+        ws = new WebSocket("wss://api.robogrow.io/socket", {
             headers: {
                 token: token
             },
