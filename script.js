@@ -198,6 +198,8 @@ async function AttemptToGetDataFromSensors() {
             //     }
             // }).then((stream) => video.srcObject = stream);
 
+            var infrared;
+            var lux;
             getLumen().then(function (luxObj) {
                 if (luxObj && luxObj.broadband) {
                     luxGreenLED.writeSync(1);
@@ -205,8 +207,8 @@ async function AttemptToGetDataFromSensors() {
 
                 blueLED.writeSync(1);
 
-                var infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2) : undefined;
-                var lux = (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined;
+                infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2) : undefined;
+                lux = (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined;
 
                 console.log("Infrared: " + infrared + " Lux: " + lux);
 
@@ -263,12 +265,34 @@ async function AttemptToGetDataFromSensors() {
                 blueLED.writeSync(0);
                 // }
             }).catch((e) => {
+                // EREMOTEIO Cannot read / write TSL2561
                 console.log(e);
+
+                console.log("Sending sensor data now.");
+                console.log("");
+
+                ws.send(JSON.stringify({
+                    growId: raspberryPiGrowId,
+                    temp: fTemp,
+                    humidity: humidity,
+                    infrared: infrared,
+                    lux: lux,
+                    config: currentGrowConfig,
+                    createGrowEvent: true
+                }));
+
+                luxGreenLED.writeSync(0);
+                tempGreenLED.writeSync(0);
+                blueLED.writeSync(0);
             });
         } else {
             console.log(err);
         }
     });
+}
+
+async function handleSensorDataSend() {
+
 }
 
 async function getLumen() {
