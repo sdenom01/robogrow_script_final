@@ -138,7 +138,7 @@ function InitializeWebSocket() {
                         console.log("Relays have already been initialized. :D");
                     }
 
-                    var minutes = 10;
+                    var minutes = 1;
                     var interval = minutes * 60 * 1000;
                     var noSleepInterval = 59 * 1000; // 59 seconds (socket timeout is 60 seconds)
 
