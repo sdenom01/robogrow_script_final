@@ -36,6 +36,8 @@ var currentGrowConfig;
 
 var token;
 
+var lastDataObject;
+
 AttemptToAuthenticate();
 
 function AttemptToAuthenticate() {
@@ -138,15 +140,15 @@ function InitializeWebSocket() {
                         console.log("Relays have already been initialized. :D");
                     }
 
-                    var minutes = 1;
+                    var minutes = 10;
                     var interval = minutes * 60 * 1000;
                     var noSleepInterval = 59 * 1000; // 59 seconds (socket timeout is 60 seconds)
 
                     console.log("Setting data report interval " + minutes + " minutes");
 
                     // Set sensor data loop
-                    noSleepHandler = setInterval(SendNoSleepPacket, noSleepInterval); // 10 minutes
-                    dataHandler = setInterval(AttemptToGetDataFromSensors, interval); // 10 minutes
+                    noSleepHandler = setInterval(SendNoSleepPacket, noSleepInterval); // 59 seconds
+                    dataHandler = setInterval(AttemptToGetDataFromSensors, interval); // 1 minute(s)
                 }
 
                 // Is relay manual override?
@@ -250,7 +252,7 @@ async function AttemptToGetDataFromSensors() {
                 console.log("Sending sensor data now.");
                 console.log("");
 
-                ws.send(JSON.stringify({
+                var dataObject = {
                     growId: raspberryPiGrowId,
                     temp: fTemp,
                     humidity: humidity,
@@ -258,7 +260,14 @@ async function AttemptToGetDataFromSensors() {
                     lux: lux,
                     config: currentGrowConfig,
                     createGrowEvent: true
-                }));
+                };
+
+                ws.send(JSON.stringify(dataObject));
+
+                // Compare last sent data object with new data object
+                CheckConditionalRelayStatus(dataObject);
+
+                lastDataObject = dataObject;
 
                 luxGreenLED.writeSync(0);
                 tempGreenLED.writeSync(0);
@@ -289,6 +298,16 @@ async function AttemptToGetDataFromSensors() {
             console.log(err);
         }
     });
+}
+
+async function CheckConditionalRelayStatus(dataObject) {
+    if (lastDataObject) {
+        // Loop through configured relays
+
+        // If the relay is a 'conditional'
+
+        // Parse the conditional, and examine new 'dataObject' vs. the old 'lastDataObject'
+    }
 }
 
 async function handleSensorDataSend() {
