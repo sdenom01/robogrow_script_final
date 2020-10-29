@@ -326,7 +326,8 @@ async function AttemptToGetDataFromSensors(sendToServer) {
 
 // TODO: This function needs to be made much more generic, lots of duplicated code
 async function CheckConditionalRelayStatus(dataObject) {
-    if (lastDataObject) {
+    console.log("CheckConditionalRelayStatus");
+    if (dataObject) {
         // Loop through configured relays
         currentGrowConfig.relaySchedules.forEach((schedule) => {
             // If the relay is a 'conditional'
