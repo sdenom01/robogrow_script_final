@@ -347,11 +347,11 @@ async function CheckConditionalRelayStatus(dataObject) {
                             console.log("Temperature in acceptable range... no changes made.");
                         }
                     } else if (condition.type == 1) { // Humidity
-                        if (dataObject.temp < condition.minValue) {
+                        if (dataObject.humidity < condition.minValue) {
                             // if minValue, we're looking for something to get too 'low'
                             console.log("Humidity Too LOW. Setting relayIndex " + condition.relayIndex + " to status " + condition.underMinStatus);
                             LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus)
-                        } else if (dataObject.temp > condition.maxValue) {
+                        } else if (dataObject.humidity > condition.maxValue) {
                             // if maxValue, we're looking for something to get too 'high'
                             console.log("Humidity Too HIGH. Setting relayIndex " + condition.relayIndex + " to status " + condition.overMaxStatus);
                             LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus)
