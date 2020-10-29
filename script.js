@@ -288,7 +288,7 @@ async function AttemptToGetDataFromSensors(sendToServer) {
                 // }
             }).catch((e) => {
                 // EREMOTEIO Cannot read / write TSL2561
-                console.log("Could not read infrared / lumen sensor.".red);
+                console.log("Could not read infrared / lumen sensor.".america);
 
                 var dataObject = {
                     growId: raspberryPiGrowId,
