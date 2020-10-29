@@ -365,11 +365,11 @@ async function CheckConditionalRelayStatus(dataObject) {
 
 async function LookForRelayIdAndSetDesiredStatus(relayId, desiredStatus) {
     relays.forEach((relay, index) => {
-        // Find the raget relay
+        // Find the target relay
         if (index == relayId) {
             if (relay.readSync() !== desiredStatus) {
-                console.log("Setting " + relay._gpio + " to " + currentEvent.status);
-                relay.writeSync(currentEvent.status);
+                console.log("Setting " + relay._gpio + " to " + desiredStatus);
+                relay.writeSync(desiredStatus);
             }
         }
     })
