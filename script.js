@@ -143,12 +143,22 @@ function InitializeWebSocket() {
                     var minutes = 10;
                     var interval = minutes * 60 * 1000;
                     var noSleepInterval = 59 * 1000; // 59 seconds (socket timeout is 60 seconds)
+                    var conditionalSensorReadInterval = 1 * 1000; // 1 second (this helps keep conditional relays in check)
 
                     console.log("Setting data report interval " + minutes + " minutes");
 
                     // Set sensor data loop
                     noSleepHandler = setInterval(SendNoSleepPacket, noSleepInterval); // 59 seconds
-                    dataHandler = setInterval(AttemptToGetDataFromSensors, interval); // 1 minute(s)
+
+                    dataHandler = setInterval(function () {
+                        AttemptToGetDataFromSensors(true).then(r => {/*do nothing*/
+                        });
+                    }, interval); // 10 minute(s)
+
+                    dataHandler = setInterval(function () {
+                        AttemptToGetDataFromSensors(false).then(r => {/*do nothing*/
+                        });
+                    }, conditionalSensorReadInterval); // 1 second
                 }
 
                 // Is relay manual override?
@@ -177,7 +187,7 @@ async function SendNoSleepPacket() {
     }));
 }
 
-async function AttemptToGetDataFromSensors() {
+async function AttemptToGetDataFromSensors(sendToServer) {
     // TODO: Determine if any relays need to be toggled.
     tempSensor.read(22, 4, function (err, temperature, humidity) {
         if (!err) {
@@ -249,6 +259,35 @@ async function AttemptToGetDataFromSensors() {
                 //     });
                 // } else {
                 // Send without image
+
+                var dataObject = {
+                    growId: raspberryPiGrowId,
+                    temp: fTemp,
+                    humidity: humidity,
+                    infrared: infrared,
+                    lux: lux,
+                    config: currentGrowConfig,
+                    createGrowEvent: true
+                };
+
+                if (!sendToServer) {
+                    // Compare last sent data object with new data object
+                    CheckConditionalRelayStatus(dataObject);
+                } else {
+                    console.log("Sending sensor data now.");
+                    console.log("");
+
+                    ws.send(JSON.stringify(dataObject));
+                    lastDataObject = dataObject;
+
+                    luxGreenLED.writeSync(0);
+                    tempGreenLED.writeSync(0);
+                    blueLED.writeSync(0);
+                }
+                // }
+            }).catch((e) => {
+                // EREMOTEIO Cannot read / write TSL2561
+                console.log("Could not read infrared / lumen sensor.".red);
                 console.log("Sending sensor data now.");
                 console.log("");
 
@@ -262,37 +301,20 @@ async function AttemptToGetDataFromSensors() {
                     createGrowEvent: true
                 };
 
-                ws.send(JSON.stringify(dataObject));
+                if (!sendToServer) {
+                    // Compare last sent data object with new data object
+                    CheckConditionalRelayStatus(dataObject);
+                } else {
+                    console.log("Sending sensor data now.");
+                    console.log("");
 
-                // Compare last sent data object with new data object
-                CheckConditionalRelayStatus(dataObject);
+                    ws.send(JSON.stringify(dataObject));
+                    lastDataObject = dataObject;
 
-                lastDataObject = dataObject;
-
-                luxGreenLED.writeSync(0);
-                tempGreenLED.writeSync(0);
-                blueLED.writeSync(0);
-                // }
-            }).catch((e) => {
-                // EREMOTEIO Cannot read / write TSL2561
-                console.log(e);
-
-                console.log("Sending sensor data now.");
-                console.log("");
-
-                ws.send(JSON.stringify({
-                    growId: raspberryPiGrowId,
-                    temp: fTemp,
-                    humidity: humidity,
-                    infrared: infrared,
-                    lux: lux,
-                    config: currentGrowConfig,
-                    createGrowEvent: true
-                }));
-
-                luxGreenLED.writeSync(0);
-                tempGreenLED.writeSync(0);
-                blueLED.writeSync(0);
+                    luxGreenLED.writeSync(0);
+                    tempGreenLED.writeSync(0);
+                    blueLED.writeSync(0);
+                }
             });
         } else {
             console.log(err);
@@ -300,14 +322,58 @@ async function AttemptToGetDataFromSensors() {
     });
 }
 
+// TODO: This function needs to be made much more generic, lots of duplicated code
 async function CheckConditionalRelayStatus(dataObject) {
     if (lastDataObject) {
         // Loop through configured relays
+        currentGrowConfig.relaySchedules.forEach((schedule) => {
+            // If the relay is a 'conditional'
+            if (schedule.type == 0) {
+                schedule.conditions.forEach((condition) => {
+                    console.log("Checking Conditional: " + condition.description)
 
-        // If the relay is a 'conditional'
-
-        // Parse the conditional, and examine new 'dataObject' vs. the old 'lastDataObject'
+                    // Parse the conditional
+                    if (condition.type == 0) { // Temp
+                        if (dataObject.temp < condition.minValue) {
+                            // if minValue, we're looking for something to get too 'low'
+                            console.log("Temperature Too LOW. Setting relayIndex " + condition.relayIndex + " to status " + condition.underMinStatus);
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus)
+                        } else if (dataObject.temp > condition.maxValue) {
+                            // if maxValue, we're looking for something to get too 'high'
+                            console.log("Temperature Too HIGH. Setting relayIndex " + condition.relayIndex + " to status " + condition.overMaxStatus);
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus)
+                        } else {
+                            console.log("Temperature in acceptable range... no changes made.");
+                        }
+                    } else if (condition.type == 1) { // Humidity
+                        if (dataObject.temp < condition.minValue) {
+                            // if minValue, we're looking for something to get too 'low'
+                            console.log("Humidity Too LOW. Setting relayIndex " + condition.relayIndex + " to status " + condition.underMinStatus);
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus)
+                        } else if (dataObject.temp > condition.maxValue) {
+                            // if maxValue, we're looking for something to get too 'high'
+                            console.log("Humidity Too HIGH. Setting relayIndex " + condition.relayIndex + " to status " + condition.overMaxStatus);
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus)
+                        } else {
+                            console.log("Humidity in acceptable range... no changes made.");
+                        }
+                    }
+                })
+            }
+        })
     }
+}
+
+async function LookForRelayIdAndSetDesiredStatus(relayId, desiredStatus) {
+    relays.forEach((relay, index) => {
+        // Find the raget relay
+        if (index == relayId) {
+            if (relay.readSync() !== desiredStatus) {
+                console.log("Setting " + relay._gpio + " to " + currentEvent.status);
+                relay.writeSync(currentEvent.status);
+            }
+        }
+    })
 }
 
 async function handleSensorDataSend() {
