@@ -331,8 +331,6 @@ async function CheckConditionalRelayStatus(dataObject) {
             // If the relay is a 'conditional'
             if (schedule.type == 0) {
                 schedule.conditions.forEach((condition) => {
-                    console.log("Checking Conditional: " + condition.description)
-
                     // Parse the conditional
                     if (condition.type == 0) { // Temp
                         if (dataObject.temp < condition.minValue) {
@@ -344,7 +342,7 @@ async function CheckConditionalRelayStatus(dataObject) {
                             console.log("Temperature Too HIGH. Setting relayIndex " + condition.relayIndex + " to status " + condition.overMaxStatus);
                             LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus)
                         } else {
-                            console.log("Temperature in acceptable range... no changes made.");
+                            // Do nothing?
                         }
                     } else if (condition.type == 1) { // Humidity
                         if (dataObject.humidity < condition.minValue) {
@@ -356,7 +354,7 @@ async function CheckConditionalRelayStatus(dataObject) {
                             console.log("Humidity Too HIGH. Setting relayIndex " + condition.relayIndex + " to status " + condition.overMaxStatus);
                             LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus)
                         } else {
-                            console.log("Humidity in acceptable range... no changes made.");
+                            // Do nothing?
                         }
                     }
                 })
