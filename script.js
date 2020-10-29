@@ -202,7 +202,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
 
             console.log("Temp: " + fTemp + " Humidity: " + humidity);
 
-
             // navigator.mediaDevices.getUserMedia({
             //     video: {
             //         width: 426,
@@ -270,6 +269,8 @@ async function AttemptToGetDataFromSensors(sendToServer) {
                     createGrowEvent: true
                 };
 
+                console.log(" ");
+
                 if (!sendToServer) {
                     // Compare last sent data object with new data object
                     CheckConditionalRelayStatus(dataObject);
@@ -288,8 +289,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
             }).catch((e) => {
                 // EREMOTEIO Cannot read / write TSL2561
                 console.log("Could not read infrared / lumen sensor.".red);
-                console.log("Sending sensor data now.");
-                console.log("");
 
                 var dataObject = {
                     growId: raspberryPiGrowId,
@@ -301,7 +300,7 @@ async function AttemptToGetDataFromSensors(sendToServer) {
                     createGrowEvent: true
                 };
 
-                console.log("sendToServer: " + sendToServer);
+                console.log(" ");
 
                 if (!sendToServer) {
                     // Compare last sent data object with new data object
@@ -326,7 +325,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
 
 // TODO: This function needs to be made much more generic, lots of duplicated code
 async function CheckConditionalRelayStatus(dataObject) {
-    console.log("CheckConditionalRelayStatus");
     if (dataObject) {
         // Loop through configured relays
         currentGrowConfig.relaySchedules.forEach((schedule) => {
