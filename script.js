@@ -455,7 +455,7 @@ function ScheduleRelays() {
                         console.log("Next event is tomorrow..." + nextDate.format('YYYY-MM-DD HH:mm:ss'));
                     }
 
-                    console.log(curDate.format('YYYY-MM-DD HH:mm:ss') + " (currdate) compared to " + nextDate.format('YYYY-MM-DD HH:mm:ss'));
+                    console.log("is " + moment() + " between " + curDate.format('YYYY-MM-DD HH:mm:ss') + " (currdate) compared to " + nextDate.format('YYYY-MM-DD HH:mm:ss'));
 
                     if (moment().isBetween(curDate, nextDate)) {
                         currentEvent = event;
