@@ -200,7 +200,9 @@ async function AttemptToGetDataFromSensors(sendToServer) {
 
             humidity = (humidity) ? humidity.toFixed(2) : undefined;
 
-            console.log("Temp: " + fTemp + " Humidity: " + humidity);
+            if (sendToServer) {
+                console.log("Temp: " + fTemp + " Humidity: " + humidity);
+            }
 
             // navigator.mediaDevices.getUserMedia({
             //     video: {
@@ -221,7 +223,9 @@ async function AttemptToGetDataFromSensors(sendToServer) {
                 infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2) : undefined;
                 lux = (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined;
 
-                console.log("Infrared: " + infrared + " Lux: " + lux);
+                if (sendToServer) {
+                    console.log("Infrared: " + infrared + " Lux: " + lux);
+                }
 
                 // var gotCam = true;
                 // var cam = new v4l2camera.Camera("/dev/video0");
@@ -288,7 +292,12 @@ async function AttemptToGetDataFromSensors(sendToServer) {
                 // }
             }).catch((e) => {
                 // EREMOTEIO Cannot read / write TSL2561
-                console.log("Could not read infrared / lumen sensor.".red);
+
+                if (sendToServer) {
+                    console.log("Could not read infrared / lumen sensor.".red);
+
+                    console.log(" ");
+                }
 
                 var dataObject = {
                     growId: raspberryPiGrowId,
@@ -299,8 +308,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
                     config: currentGrowConfig,
                     createGrowEvent: true
                 };
-
-                console.log(" ");
 
                 if (!sendToServer) {
                     // Compare last sent data object with new data object
@@ -429,55 +436,59 @@ function ScheduleRelays() {
 
         // For each schedule
         relaySchedules.forEach((schedule, index) => {
-            let currentEvent;
+            if (schedule.type == 1) {
+                let currentEvent;
 
-            // Get current event, and next event by looking at current time
-            // Check every event, if current time is past
-            schedule.events.forEach((event, index) => {
-                let isToday = (index + 1 < schedule.events.length);
-                var nextEvent = schedule.events[isToday ? index + 1 : 0];
+                // Get current event, and next event by looking at current time
+                // Check every event, if current time is past
+                schedule.events.forEach((event, eIndex) => {
+                    let isToday = (eIndex + 1 < schedule.events.length);
+                    var nextEvent = schedule.events[isToday ? eIndex + 1 : 0];
 
-                var curDate = moment(event.triggerTime, 'HH:mm:ss');
-                var nextDate = moment(nextEvent.triggerTime, 'HH:mm:ss');
+                    var curDate = moment(event.triggerTime, 'HH:mm:ss');
+                    var nextDate = moment(nextEvent.triggerTime, 'HH:mm:ss');
 
-                if (!isToday) {
-                    // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
-                    nextDate = nextDate.add(24, 'hours');
-                    console.log("Current event is today..." + curDate.format('YYYY-MM-DD HH:mm:ss'));
-                    console.log("Next event is tomorrow..." + nextDate.format('YYYY-MM-DD HH:mm:ss'));
+                    if (!isToday) {
+                        // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
+                        nextDate = nextDate.add(24, 'hours');
+                        console.log("Current event is today..." + curDate.format('YYYY-MM-DD HH:mm:ss'));
+                        console.log("Next event is tomorrow..." + nextDate.format('YYYY-MM-DD HH:mm:ss'));
+                    }
+
+                    if (moment().isBetween(curDate, nextDate)) {
+                        currentEvent = event;
+                    }
+
+                    if (event.triggerTime && nextEvent.triggerTime) {
+                        var triggerTime = event.triggerTime.split(":");
+
+                        var triggerTimeHours = parseInt(triggerTime[0]);
+                        var triggerTimeMinutes = parseInt(triggerTime[1]);
+                        var triggerTimeSeconds = parseInt(triggerTime[2]);
+
+                        table.addRow((pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds)), event.Description);
+
+                        var j = nodeSchedule.scheduleJob({
+                            hour: triggerTimeHours,
+                            minute: triggerTimeMinutes,
+                            second: triggerTimeSeconds
+                        }, function () {
+                            console.log(new Date() + ' FIRE JOB: ' + event.status + ' -- ' + event.Description);
+                            relays[index].writeSync(event.status);
+                            console.log('Relay Status: ' + relays[index].readSync());
+                        });
+
+                        relayJobs.push(j);
+                    }
+                });
+
+                if (currentEvent) {
+                    // Associate relay GPIO with schedule id
+                    let associatedRelay = relays[index];
+                    DetermineRequiredRelayStatus(associatedRelay, currentEvent);
+                } else {
+                    console.log("Current Event is Null");
                 }
-
-                if (moment().isBetween(curDate, nextDate)) {
-                    currentEvent = event;
-                }
-
-                if (event.triggerTime && nextEvent.triggerTime) {
-                    var triggerTime = event.triggerTime.split(":");
-
-                    var triggerTimeHours = parseInt(triggerTime[0]);
-                    var triggerTimeMinutes = parseInt(triggerTime[1]);
-                    var triggerTimeSeconds = parseInt(triggerTime[2]);
-
-                    table.addRow((pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds)), event.Description);
-
-                    var j = nodeSchedule.scheduleJob({
-                        hour: triggerTimeHours,
-                        minute: triggerTimeMinutes,
-                        second: triggerTimeSeconds
-                    }, function () {
-                        console.log(new Date() + ' FIRE JOB: ' + event.status + ' -- ' + event.Description);
-                        relays[schedule.type].writeSync(event.status);
-                        console.log('Relay Status: ' + relays[schedule.type].readSync());
-                    });
-
-                    relayJobs.push(j);
-                }
-            });
-
-            if (currentEvent) {
-                // Associate relay GPIO with schedule id
-                let associatedRelay = relays[index];
-                DetermineRequiredRelayStatus(associatedRelay, currentEvent);
             }
         });
 
@@ -493,6 +504,7 @@ function ScheduleRelays() {
 }
 
 function DetermineRequiredRelayStatus(relay, currentEvent) {
+    console.log("Checking relay " + relay.id);
     if (relay.readSync() !== currentEvent.status) {
         console.log("Setting " + relay._gpio + " to " + currentEvent.status);
         relay.writeSync(currentEvent.status);
