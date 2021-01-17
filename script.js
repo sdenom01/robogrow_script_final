@@ -10,8 +10,8 @@ const blueLED = new gpio(23, 'out');
 const relays = [
     new gpio(17, 'out'),
     new gpio(27, 'out'),
-    new gpio(28, 'out'),
-    new gpio(29, 'out'),
+    new gpio(20, 'out'),
+    new gpio(21, 'out'),
 ];
 
 var colors = require('colors');
