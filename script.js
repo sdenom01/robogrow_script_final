@@ -8,8 +8,8 @@ const tempGreenLED = new gpio(25, 'out');
 const luxGreenLED = new gpio(24, 'out');
 const blueLED = new gpio(23, 'out');
 const relays = [
-    new gpio(17, 'out'),
-    new gpio(27, 'out')
+        new gpio(17, 'out'),
+        new gpio(27, 'out')
 ];
 
 var colors = require('colors');
@@ -506,10 +506,12 @@ function ScheduleRelays() {
 }
 
 function DetermineRequiredRelayStatus(relay, currentEvent) {
-    console.log("Checking relay " + relay.id);
-    if (relay.readSync() !== currentEvent.status) {
-        console.log("Setting " + relay._gpio + " to " + currentEvent.status);
-        relay.writeSync(currentEvent.status);
+    if (relay) {
+        console.log("Checking relay " + relay.id);
+        if (relay.readSync() !== currentEvent.status) {
+            console.log("Setting " + relay._gpio + " to " + currentEvent.status);
+            relay.writeSync(currentEvent.status);
+        }
     }
 }
 
