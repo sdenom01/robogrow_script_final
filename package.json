@@ -1,6 +1,9 @@
 {
   "name": "robogrow_script_final",
   "version": "0.0.1",
+  "scripts": {
+    "start": "node script.js"
+  },
   "dependencies": {
     "ada-tsl2561": "^1.0.0",
     "ascii-table": "0.0.9",
