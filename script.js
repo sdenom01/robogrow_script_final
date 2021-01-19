@@ -453,15 +453,14 @@ function ScheduleRelays() {
                     if (!isToday) {
                         // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
                         nextDate = nextDate.add(24, 'hours');
-                        console.log("Current event is today..." + curDate.format('YYYY-MM-DD HH:mm:ss'));
-                        console.log("Next event is tomorrow..." + nextDate.format('YYYY-MM-DD HH:mm:ss'));
-                        console.log("\r\n");
+                        console.log(schedule.name + " current event is today..." + curDate.format('YYYY-MM-DD HH:mm:ss'));
+                        console.log(schedule.name + " next event is tomorrow..." + nextDate.format('YYYY-MM-DD HH:mm:ss'));
                     }
 
                     console.log("is " + moment().format('YYYY-MM-DD HH:mm:ss') + " between " + curDate.format('YYYY-MM-DD HH:mm:ss') + " (currdate) compared to " + nextDate.format('YYYY-MM-DD HH:mm:ss') + " " + moment().isBetween(curDate, nextDate));
 
                     if (moment().isBetween(curDate, nextDate)) {
-                        currentEvent = event;
+                        schedule.currentEvent = event;
                     }
 
                     if (event.triggerTime && nextEvent.triggerTime) {
@@ -487,10 +486,10 @@ function ScheduleRelays() {
                     }
                 });
 
-                if (currentEvent) {
+                if (schedule.currentEvent) {
                     // Associate relay GPIO with schedule id
                     let associatedRelay = relays[index];
-                    DetermineRequiredRelayStatus(associatedRelay, currentEvent);
+                    DetermineRequiredRelayStatus(associatedRelay, schedule);
                 } else {
                     console.log("Current Event is Null");
                 }
@@ -508,12 +507,16 @@ function ScheduleRelays() {
     }
 }
 
-function DetermineRequiredRelayStatus(relay, currentEvent) {
+function DetermineRequiredRelayStatus(relay, schedule) {
     if (relay) {
-        console.log("Checking relay " + relay.id);
-        if (relay.readSync() !== currentEvent.status) {
-            console.log("Setting " + relay._gpio + " to " + currentEvent.status);
-            relay.writeSync(currentEvent.status);
+        console.log("Checking relay " + relay._gpio);
+        if (relay.readSync() !== schedule.currentEvent.status) {
+            console.log("Setting " + relay._gpio + " to " + schedule.currentEvent.status);
+            relay.writeSync(schedule.currentEvent.status);
+            console.log("Relay Status: " + relay.readSync());
+            console.log("\r\n");
+        } else {
+            console.log("Already set correctly");
         }
     }
 }
