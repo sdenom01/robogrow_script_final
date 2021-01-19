@@ -517,6 +517,7 @@ function DetermineRequiredRelayStatus(relay, schedule) {
             console.log("\r\n");
         } else {
             console.log("Already set correctly");
+            console.log("\r\n");
         }
     }
 }
