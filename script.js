@@ -440,6 +440,8 @@ function ScheduleRelays() {
                     var curDate = moment(event.triggerTime, 'HH:mm:ss');
                     var nextDate = moment(nextEvent.triggerTime, 'HH:mm:ss');
 
+                    console.log("events: " + schedule.events.length);
+
                     if (!isToday && schedule.events.length > 0) {
                         // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
                         curDate = curDate.subtract(24, 'hours');
