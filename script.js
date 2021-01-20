@@ -142,10 +142,10 @@ function InitializeWebSocket() {
                         console.log("Relays have already been initialized. :D");
                     }
 
-                    var minutes = 10;
-                    var interval = minutes * 60 * 1000;
-                    var noSleepInterval = 59 * 1000; // 59 seconds (socket timeout is 60 seconds)
-                    var conditionalSensorReadInterval = 1 * 1000; // 1 second (this helps keep conditional relays in check)
+                    let minutes = 10;
+                    let interval = minutes * 60 * 1000;
+                    let noSleepInterval = 59 * 1000; // 59 seconds (socket timeout is 60 seconds)
+                    let conditionalSensorReadInterval = 1 * 1000; // 1 second (this helps keep conditional relays in check)
 
                     console.log("Setting data report interval " + minutes + " minutes");
 
@@ -420,7 +420,6 @@ function ScheduleRelays() {
             relayJobs = [];
         }
 
-
         // Relays
         var relaySchedules = currentGrowConfig.relaySchedules;
 
@@ -472,6 +471,8 @@ function ScheduleRelays() {
                         var triggerTimeSeconds = parseInt(triggerTime[2]);
 
                         table.addRow((pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds)), event.Description);
+
+                        console.log(new Date());
 
                         var j = nodeSchedule.scheduleJob({
                             hour: triggerTimeHours,
