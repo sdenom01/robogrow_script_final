@@ -442,9 +442,14 @@ function ScheduleRelays() {
 
                     console.log("events: " + schedule.events.length);
 
-                    if (!isToday && schedule.events.length > 1) {
-                        // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
-                        curDate = curDate.subtract(24, 'hours');
+                    if (!isToday) {
+                        if (schedule.events.length > 1) {
+                            // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
+                            curDate = curDate.subtract(24, 'hours');
+                        } else {
+                            // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
+                            nextDate = nextDate.add(24, 'hours');
+                        }
                     }
 
                     console.log("is "
