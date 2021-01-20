@@ -275,8 +275,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
                     createGrowEvent: true
                 };
 
-                console.log(" ");
-
                 if (!sendToServer) {
                     // Compare last sent data object with new data object
                     CheckConditionalRelayStatus(dataObject);
