@@ -442,10 +442,16 @@ function ScheduleRelays() {
 
                     if (!isToday) {
                         // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
-                        nextDate = nextDate.add(24, 'hours');
+                        nextDate = nextDate.subtract(24, 'hours');
                     }
 
-                    console.log("is " + moment().format('YYYY-MM-DD HH:mm:ss') + " between " + curDate.format('YYYY-MM-DD HH:mm:ss') + " (currdate) compared to " + nextDate.format('YYYY-MM-DD HH:mm:ss') + " " + moment().isBetween(curDate, nextDate));
+                    console.log("is "
+                        + moment().format('YYYY-MM-DD HH:mm:ss')
+                        + " between "
+                        + curDate.format('YYYY-MM-DD HH:mm:ss')
+                        + " (currdate) compared to "
+                        + nextDate.format('YYYY-MM-DD HH:mm:ss')
+                        + " " + moment().isBetween(curDate, nextDate));
 
                     if (moment().isBetween(curDate, nextDate)) {
                         schedule.currentEvent = event;
