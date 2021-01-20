@@ -473,7 +473,7 @@ function ScheduleRelays() {
                         table.addRow((pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds)), event.Description);
 
                         console.log("Now: " + new Date());
-                        console.log("Now: " + (pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds)), event.Description);
+                        console.log("TT: " + pad(triggerTimeHours) + ":" + pad(triggerTimeMinutes) + ':' + pad(triggerTimeSeconds));
 
                         var j = nodeSchedule.scheduleJob({
                             hour: triggerTimeHours,
