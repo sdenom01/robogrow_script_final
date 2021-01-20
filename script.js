@@ -344,26 +344,18 @@ async function CheckConditionalRelayStatus(dataObject) {
                     if (condition.type == 0) { // Temp
                         if (dataObject.temp < condition.minValue) {
                             // if minValue, we're looking for something to get too 'low'
-                            console.log("Temperature Too LOW. Setting relayIndex " + condition.relayIndex + " to status " + condition.underMinStatus);
-                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus)
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus, "Temperature Too LOW. Setting relayIndex ")
                         } else if (dataObject.temp > condition.maxValue) {
                             // if maxValue, we're looking for something to get too 'high'
-                            console.log("Temperature Too HIGH. Setting relayIndex " + condition.relayIndex + " to status " + condition.overMaxStatus);
-                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus)
-                        } else {
-                            // Do nothing?
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus, "Temperature Too HIGH. Setting relayIndex ")
                         }
                     } else if (condition.type == 1) { // Humidity
                         if (dataObject.humidity < condition.minValue) {
                             // if minValue, we're looking for something to get too 'low'
-                            console.log("Humidity Too LOW. Setting relayIndex " + condition.relayIndex + " to status " + condition.underMinStatus);
-                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus)
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus, "Humidity Too LOW. Setting relayIndex " )
                         } else if (dataObject.humidity > condition.maxValue) {
                             // if maxValue, we're looking for something to get too 'high'
-                            console.log("Humidity Too HIGH. Setting relayIndex " + condition.relayIndex + " to status " + condition.overMaxStatus);
-                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus)
-                        } else {
-                            // Do nothing?
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus, "Humidity Too HIGH. Setting relayIndex ")
                         }
                     }
                 })
@@ -372,12 +364,12 @@ async function CheckConditionalRelayStatus(dataObject) {
     }
 }
 
-async function LookForRelayIdAndSetDesiredStatus(relayId, desiredStatus) {
+async function LookForRelayIdAndSetDesiredStatus(relayId, desiredStatus, preString) {
     relays.forEach((relay, index) => {
         // Find the target relay
         if (index == relayId) {
             if (relay.readSync() !== desiredStatus) {
-                console.log("Setting " + relay._gpio + " to " + desiredStatus);
+                console.log(preString + relayId + " to status " + desiredStatus);
                 relay.writeSync(desiredStatus);
             }
         }
@@ -453,8 +445,6 @@ function ScheduleRelays() {
                     if (!isToday) {
                         // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
                         nextDate = nextDate.add(24, 'hours');
-                        console.log(schedule.name + " current event is today..." + curDate.format('YYYY-MM-DD HH:mm:ss'));
-                        console.log(schedule.name + " next event is tomorrow..." + nextDate.format('YYYY-MM-DD HH:mm:ss'));
                     }
 
                     console.log("is " + moment().format('YYYY-MM-DD HH:mm:ss') + " between " + curDate.format('YYYY-MM-DD HH:mm:ss') + " (currdate) compared to " + nextDate.format('YYYY-MM-DD HH:mm:ss') + " " + moment().isBetween(curDate, nextDate));
