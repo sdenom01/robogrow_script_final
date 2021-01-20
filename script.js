@@ -442,7 +442,7 @@ function ScheduleRelays() {
 
                     if (!isToday) {
                         // Event takes place tomorrrow add 24 hours to nextEvent (for 'current event')
-                        nextDate = nextDate.subtract(24, 'hours');
+                        curDate = curDate.subtract(24, 'hours');
                     }
 
                     console.log("is "
