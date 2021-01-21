@@ -494,7 +494,9 @@ function ScheduleRelays() {
                     let associatedRelay = relays[index];
                     DetermineRequiredRelayStatus(associatedRelay, schedule);
                 } else {
-                    console.log("Current Event is Null");
+                    // Associate relay GPIO with schedule id
+                    let associatedRelay = relays[0];
+                    DetermineRequiredRelayStatus(associatedRelay, schedule);
                 }
             }
         });
