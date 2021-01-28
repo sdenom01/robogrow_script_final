@@ -191,97 +191,100 @@ async function SendNoSleepPacket() {
 async function AttemptToGetDataFromSensors(sendToServer) {
     // TODO: Determine if any relays need to be toggled.
     console.log("AttemptToGetDataFromSensors(" + sendToServer + ")")
-    tempSensor.read(22, 4, function (err, temperature, humidity) {
-        if (!err) {
-            console.log("...");
-            var cTemp = temperature;
-            var fTemp = (cTemp * 9 / 5 + 32).toFixed(2);
+    tempSensor.read(22, 4)
+        .then((err, temperature, humidity) => {
+            if (!err) {
+                console.log("...");
+                var cTemp = temperature;
+                var fTemp = (cTemp * 9 / 5 + 32).toFixed(2);
 
-            if (fTemp && fTemp != 0.0) {
-                tempGreenLED.writeSync(1);
-            }
+                if (fTemp && fTemp != 0.0) {
+                    tempGreenLED.writeSync(1);
+                }
 
-            humidity = (humidity) ? humidity.toFixed(2) : undefined;
-
-            if (sendToServer) {
-                console.log("Temp: " + fTemp + " Humidity: " + humidity);
-            }
-
-            // navigator.mediaDevices.getUserMedia({
-            //     video: {
-            //         width: 426,
-            //         height: 240
-            //     }
-            // }).then((stream) => video.srcObject = stream);
-
-            var infrared;
-            var lux;
-            getLumen().then(function (luxObj) {
-                infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2) : undefined;
-                lux = (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined;
+                humidity = (humidity) ? humidity.toFixed(2) : undefined;
 
                 if (sendToServer) {
-                    console.log("Infrared: " + infrared + " Lux: " + lux);
+                    console.log("Temp: " + fTemp + " Humidity: " + humidity);
                 }
 
-                var dataObject = {
-                    growId: raspberryPiGrowId,
-                    temp: fTemp,
-                    humidity: humidity,
-                    infrared: infrared,
-                    lux: lux,
-                    config: currentGrowConfig,
-                    createGrowEvent: true
-                };
+                // navigator.mediaDevices.getUserMedia({
+                //     video: {
+                //         width: 426,
+                //         height: 240
+                //     }
+                // }).then((stream) => video.srcObject = stream);
 
-                if (!sendToServer) {
-                    // Compare last sent data object with new data object
-                    CheckConditionalRelayStatus(dataObject);
-                } else {
-                    console.log("Sending sensor data now.");
-                    console.log("");
+                var infrared;
+                var lux;
+                getLumen().then(function (luxObj) {
+                    infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2) : undefined;
+                    lux = (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined;
 
-                    ws.send(JSON.stringify(dataObject));
-                    lastDataObject = dataObject;
-                }
-                // }
-            }).catch((e) => {
-                // EREMOTEIO Cannot read / write TSL2561
+                    if (sendToServer) {
+                        console.log("Infrared: " + infrared + " Lux: " + lux);
+                    }
 
-                if (sendToServer) {
-                    console.log("Could not read infrared / lumen sensor.".red);
+                    var dataObject = {
+                        growId: raspberryPiGrowId,
+                        temp: fTemp,
+                        humidity: humidity,
+                        infrared: infrared,
+                        lux: lux,
+                        config: currentGrowConfig,
+                        createGrowEvent: true
+                    };
 
-                    console.log(" ");
-                }
+                    if (!sendToServer) {
+                        // Compare last sent data object with new data object
+                        CheckConditionalRelayStatus(dataObject);
+                    } else {
+                        console.log("Sending sensor data now.");
+                        console.log("");
 
-                var dataObject = {
-                    growId: raspberryPiGrowId,
-                    temp: fTemp,
-                    humidity: humidity,
-                    infrared: infrared,
-                    lux: lux,
-                    config: currentGrowConfig,
-                    createGrowEvent: true
-                };
+                        ws.send(JSON.stringify(dataObject));
+                        lastDataObject = dataObject;
+                    }
+                    // }
+                }).catch((e) => {
+                    // EREMOTEIO Cannot read / write TSL2561
 
-                if (!sendToServer) {
-                    console.log("Attempting to read Soil Moisture: ");
-                    console.log(soilMoisture.readSync());
+                    if (sendToServer) {
+                        console.log("Could not read infrared / lumen sensor.".red);
 
-                    // Compare last sent data object with new data object
-                    CheckConditionalRelayStatus(dataObject);
-                } else {
-                    console.log("Sending sensor data now.");
-                    console.log("");
+                        console.log(" ");
+                    }
 
-                    ws.send(JSON.stringify(dataObject));
-                    lastDataObject = dataObject;
-                }
-            });
-        } else {
-            console.log("ERR");
-            console.log(err);
-        }
+                    var dataObject = {
+                        growId: raspberryPiGrowId,
+                        temp: fTemp,
+                        humidity: humidity,
+                        infrared: infrared,
+                        lux: lux,
+                        config: currentGrowConfig,
+                        createGrowEvent: true
+                    };
+
+                    if (!sendToServer) {
+                        console.log("Attempting to read Soil Moisture: ");
+                        console.log(soilMoisture.readSync());
+
+                        // Compare last sent data object with new data object
+                        CheckConditionalRelayStatus(dataObject);
+                    } else {
+                        console.log("Sending sensor data now.");
+                        console.log("");
+
+                        ws.send(JSON.stringify(dataObject));
+                        lastDataObject = dataObject;
+                    }
+                });
+            } else {
+                console.log("ERR");
+                console.log(err);
+            }
+        }).catch((e) => {
+            console.log(e);
     });
 }
 
@@ -305,7 +308,7 @@ async function CheckConditionalRelayStatus(dataObject) {
                     } else if (condition.type == 1) { // Humidity
                         if (dataObject.humidity < condition.minValue) {
                             // if minValue, we're looking for something to get too 'low'
-                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus, "Humidity Too LOW. Setting relayIndex " )
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus, "Humidity Too LOW. Setting relayIndex ")
                         } else if (dataObject.humidity > condition.maxValue) {
                             // if maxValue, we're looking for something to get too 'high'
                             LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus, "Humidity Too HIGH. Setting relayIndex ")
