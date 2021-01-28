@@ -4,9 +4,8 @@ const moment = require('moment');
 
 const gpio = require('onoff').Gpio;
 const connectedGreenLED = new gpio(16, 'out');
-const tempGreenLED = new gpio(25, 'out');
-const luxGreenLED = new gpio(24, 'out');
-const blueLED = new gpio(23, 'out');
+const soilMoisture = new gpio(20, 'in');
+
 const relays = [
     new gpio(17, 'out'),
     new gpio(27, 'out'),
@@ -216,54 +215,12 @@ async function AttemptToGetDataFromSensors(sendToServer) {
             var infrared;
             var lux;
             getLumen().then(function (luxObj) {
-                if (luxObj && luxObj.broadband) {
-                    luxGreenLED.writeSync(1);
-                }
-
-                blueLED.writeSync(1);
-
                 infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2) : undefined;
                 lux = (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined;
 
                 if (sendToServer) {
                     console.log("Infrared: " + infrared + " Lux: " + lux);
                 }
-
-                // var gotCam = true;
-                // var cam = new v4l2camera.Camera("/dev/video0");
-                // if (cam.configGet().formatName !== "MJPG") {
-                //     console.log("NOTICE: MJPG camera required");
-                //     gotCam = false;
-                // }
-                //
-                // if (gotCam) {
-                //     // Capture image buffer and send
-                //     cam.start();
-                //     cam.capture(function (success) {
-                //         var frame = cam.frameRaw();
-                //
-                //         console.log("Sending sensor data now.");
-                //         console.log("");
-                //
-                //         ws.send(JSON.stringify({
-                //             growId: raspberryPiGrowId,
-                //             temp: fTemp,
-                //             humidity: humidity,
-                //             infrared: infrared,
-                //             lux: lux,
-                //             config: currentGrowConfig,
-                //             createGrowEvent: true,
-                //             frame: frame
-                //         }));
-                //
-                //         luxGreenLED.writeSync(0);
-                //         tempGreenLED.writeSync(0);
-                //         blueLED.writeSync(0);
-                //
-                //         cam.stop();
-                //     });
-                // } else {
-                // Send without image
 
                 var dataObject = {
                     growId: raspberryPiGrowId,
@@ -284,10 +241,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
 
                     ws.send(JSON.stringify(dataObject));
                     lastDataObject = dataObject;
-
-                    luxGreenLED.writeSync(0);
-                    tempGreenLED.writeSync(0);
-                    blueLED.writeSync(0);
                 }
                 // }
             }).catch((e) => {
@@ -310,6 +263,9 @@ async function AttemptToGetDataFromSensors(sendToServer) {
                 };
 
                 if (!sendToServer) {
+                    console.log("Attempting to read Soil Moisture: ");
+                    console.log(soilMoisture.readSync());
+
                     // Compare last sent data object with new data object
                     CheckConditionalRelayStatus(dataObject);
                 } else {
@@ -318,10 +274,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
 
                     ws.send(JSON.stringify(dataObject));
                     lastDataObject = dataObject;
-
-                    luxGreenLED.writeSync(0);
-                    tempGreenLED.writeSync(0);
-                    blueLED.writeSync(0);
                 }
             });
         } else {
@@ -375,6 +327,11 @@ async function LookForRelayIdAndSetDesiredStatus(relayId, desiredStatus, preStri
 }
 
 async function handleSensorDataSend() {
+
+}
+
+
+async function getSoilMoisture() {
 
 }
 
