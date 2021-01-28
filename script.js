@@ -191,10 +191,7 @@ async function SendNoSleepPacket() {
 async function AttemptToGetDataFromSensors(sendToServer) {
     // TODO: Determine if any relays need to be toggled.
     console.log("Attempting to read Soil Moisture: ");
-    soilMoisture.watch((err, value) => {
-        console.log("ERR: " + err);
-        console.log("Value: " + value);
-    });
+    console.log(soilMoisture.readSync());
 
     tempSensor.read(22, 4, function (err, temperature, humidity) {
         if (!err) {
