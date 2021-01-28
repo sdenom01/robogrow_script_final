@@ -279,6 +279,8 @@ async function AttemptToGetDataFromSensors(sendToServer) {
         } else {
             console.log(err);
         }
+    }).catch(() => {
+        console.log("shiiiiit");
     });
 }
 
