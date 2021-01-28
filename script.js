@@ -196,15 +196,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
     let x = (bigRelayPin.readSync() == 0) ? 1: 0;
     bigRelayPin.writeSync(x);
 
-    soilMoisture.watch(function (err, value) { //Watch for hardware interrupts on pushButton GPIO, specify callback function
-        if (err) { //if an error
-            console.error('There was an error', err); //output error message to console
-            return;
-        }
-
-        console.log(value);
-    });
-
 
     tempSensor.read(22, 4, function (err, temperature, humidity) {
         if (!err) {
