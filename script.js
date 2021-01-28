@@ -278,6 +278,7 @@ async function AttemptToGetDataFromSensors(sendToServer) {
                 }
             });
         } else {
+            console.log("ERR");
             console.log(err);
         }
     });
