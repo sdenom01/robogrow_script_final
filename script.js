@@ -5,7 +5,7 @@ const moment = require('moment');
 const gpio = require('onoff').Gpio;
 const connectedGreenLED = new gpio(16, 'out');
 
-const soilMoisture = new gpio(20, 'in', 'both');
+const bigRelayPin = new gpio(20, 'out');
 
 const relays = [
     new gpio(17, 'out'),
@@ -191,7 +191,11 @@ async function SendNoSleepPacket() {
 
 async function AttemptToGetDataFromSensors(sendToServer) {
     // TODO: Determine if any relays need to be toggled.
-    console.log("Attempting to read Soil Moisture: ");
+    console.log("Toggle Relay! " + bigRelayPin.readSync());
+
+    let x = (bigRelayPin.readSync() == 0) ? 1: 0;
+    bigRelayPin.writeSync(x);
+
     soilMoisture.watch(function (err, value) { //Watch for hardware interrupts on pushButton GPIO, specify callback function
         if (err) { //if an error
             console.error('There was an error', err); //output error message to console
