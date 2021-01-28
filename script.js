@@ -192,6 +192,7 @@ async function AttemptToGetDataFromSensors(sendToServer) {
     // TODO: Determine if any relays need to be toggled.
     tempSensor.read(22, 4, function (err, temperature, humidity) {
         if (!err) {
+            console.log("...");
             var cTemp = temperature;
             var fTemp = (cTemp * 9 / 5 + 32).toFixed(2);
 
@@ -279,8 +280,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
         } else {
             console.log(err);
         }
-    }).catch(() => {
-        console.log("shiiiiit");
     });
 }
 
