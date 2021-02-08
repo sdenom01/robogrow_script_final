@@ -18,9 +18,9 @@ var colors = require('colors');
 
 // var v4l2camera = require("v4l2camera");
 
-var raspberryPiId = "robo_003";
-var raspberryPiGrowId = "600ee2c589c279120e179207";
-var raspberryPiGrowConfigId = "6012f92089c279120e179544";
+var raspberryPiId = "robo_001";
+var raspberryPiGrowId = "600880876b9f855a3eb2b5bc";
+var raspberryPiGrowConfigId = "5eea4b705f99f8370cc9e126";
 
 var tempSensor = require("node-dht-sensor");
 
