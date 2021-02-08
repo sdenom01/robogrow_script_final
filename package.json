@@ -8,6 +8,7 @@
     "ada-tsl2561": "^1.0.0",
     "ascii-table": "0.0.9",
     "colors": "^1.4.0",
+    "console-stamp": "^0.2.9",
     "i2c-bus": "^5.2.0",
     "moment": "^2.27.0",
     "node-dht-sensor": "^0.4.2",
