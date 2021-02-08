@@ -204,6 +204,7 @@ async function AttemptToGetDataFromSensors(sendToServer) {
     let x = (bigRelayPin.readSync() == 0) ? 1 : 0;
     bigRelayPin.writeSync(x);
 
+    tempSensor.setMaxRetries(10);
     tempSensor.initialize(22, 4);
 
     tempSensor.read(22, 4).then(
