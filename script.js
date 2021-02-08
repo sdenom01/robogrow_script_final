@@ -5,7 +5,7 @@ const moment = require('moment');
 const gpio = require('onoff').Gpio;
 const connectedGreenLED = new gpio(16, 'out');
 
-const bigRelayPin = new gpio(20, 'out');
+const bigRelayPin = new gpio(26, 'out');
 
 const relays = [
     new gpio(17, 'out'),
@@ -195,7 +195,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
 
     let x = (bigRelayPin.readSync() == 0) ? 1: 0;
     bigRelayPin.writeSync(x);
-
 
     tempSensor.read(22, 4, function (err, temperature, humidity) {
         if (!err) {
