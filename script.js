@@ -202,10 +202,6 @@ async function AttemptToGetDataFromSensors(sendToServer) {
             var cTemp = temperature;
             var fTemp = (cTemp * 9 / 5 + 32).toFixed(2);
 
-            if (fTemp && fTemp != 0.0) {
-                tempGreenLED.writeSync(1);
-            }
-
             humidity = (humidity) ? humidity.toFixed(2) : undefined;
 
             if (sendToServer) {
