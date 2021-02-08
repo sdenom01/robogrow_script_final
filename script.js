@@ -5,8 +5,6 @@ const moment = require('moment');
 const gpio = require('onoff').Gpio;
 const connectedGreenLED = new gpio(16, 'out');
 
-const bigRelayPin = new gpio(26, 'out');
-
 const relays = [
     new gpio(17, 'out'),
     new gpio(27, 'out'),
@@ -39,6 +37,9 @@ var currentGrowConfig;
 var token;
 
 var lastDataObject;
+
+// add timestamps in front of log messages
+require('console-stamp')(console, '[HH:MM:ss.l]');
 
 AttemptToAuthenticate();
 
@@ -190,15 +191,8 @@ async function SendNoSleepPacket() {
 }
 
 async function AttemptToGetDataFromSensors(sendToServer) {
-    // TODO: Determine if any relays need to be toggled.
-    console.log("Toggle Relay! " + bigRelayPin.readSync());
-
-    let x = (bigRelayPin.readSync() == 0) ? 1: 0;
-    bigRelayPin.writeSync(x);
-
     tempSensor.read(22, 4, function (err, temperature, humidity) {
         if (!err) {
-            console.log("...");
             var cTemp = temperature;
             var fTemp = (cTemp * 9 / 5 + 32).toFixed(2);
 
