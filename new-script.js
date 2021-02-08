@@ -40,21 +40,6 @@ let lastDataObject;
 let currentGrowConfig;
 let relaysAreInitialized = false;
 
-/** Start Script */
-Initialize();
-
-function Initialize() {
-    // Authenticate with API
-    AttemptToAuthenticate.then(() => {
-        // Successfully Authenticated
-        InitializeWebSocket.then();
-    }).catch(() => {
-        console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
-
-        // Retry until successful
-        setTimeout(Initialize, 5000);
-    });
-}
 const AttemptToAuthenticate = new Promise((resolve, reject) => {
     const requestOptions = {
         method: 'POST',
@@ -504,3 +489,18 @@ function DetermineRequiredRelayStatus(relay, schedule) {
     }
 }
 
+function Initialize() {
+    // Authenticate with API
+    AttemptToAuthenticate.then(() => {
+        // Successfully Authenticated
+        InitializeWebSocket.then();
+    }).catch(() => {
+        console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
+
+        // Retry until successful
+        setTimeout(Initialize, 5000);
+    });
+}
+
+/** Start Script */
+Initialize();
