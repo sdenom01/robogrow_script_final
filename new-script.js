@@ -90,9 +90,12 @@ const InitializeWebSocket = new Promise((resolve, reject) => {
                 HandleSocketMessage(data);
             }
         });
+
+        resolve();
     } else {
         // NO TOKEN
         console.log("NO TOKEN??");
+        reject();
     }
 });
 
