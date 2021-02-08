@@ -24,11 +24,6 @@ const raspberryPiId = "robo_003";
 const raspberryPiGrowId = "600ee2c589c279120e179207";
 const raspberryPiGrowConfigId = "6012f92089c279120e179544";
 
-const minutes = 10;
-const interval = minutes * 60 * 1000;
-const noSleepInterval = 59 * 1000; // 59 seconds (socket timeout is 60 seconds)
-const conditionalSensorReadInterval = 1 * 1000; // 1 second (this helps keep conditional relays in check)
-
 // Local Variables
 let ws;
 let token;
@@ -40,66 +35,25 @@ let lastDataObject;
 let currentGrowConfig;
 let relaysAreInitialized = false;
 
+/** Start Script */
+Initialize();
+
 function Initialize() {
     // Authenticate with API
-    AttemptToAuthenticate.then(() => {
-        console.log("RESOLVE");
+    AttemptToAuthenticate();
 
-        // Successfully Authenticated
-        InitializeWebSocket.then();
-    }).catch(() => {
-        console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
-
-        // Retry until successful
-        setTimeout(Initialize, 5000);
-    });
+    // AttemptToAuthenticate.then(() => {
+    //     // Successfully Authenticated
+    //     InitializeWebSocket.then();
+    // }).catch(() => {
+    //     console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
+    //
+    //     // Retry until successful
+    //     setTimeout(Initialize, 5000);
+    // });
 }
 
-const InitializeWebSocket = new Promise((resolve, reject) => {
-    if (token) {
-        console.log("Initializing Websocket... " + ws.url);
-        ws = new WebSocket("wss://api.robogrow.io", {
-            headers: {
-                token: token
-            },
-            followRedirects: true
-        }, {
-            followRedirects: true
-        });
-
-        // On Connection Open
-        ws.on('open', function () {
-            console.log('Connection successfully opened to server.');
-            console.log('Turning on green connectivity LED.');
-            connectedGreenLED.writeSync(1);
-        });
-
-        // On Connection Error
-        ws.on('error', function (error) {
-            console.log(`WebSocket error: ${error}`)
-        });
-
-        // On Connection Close
-        ws.on('close', function close() {
-            HandleSocketClose()
-        });
-
-        // On Connection Message
-        ws.on('message', function (data, flags) {
-            if (data) {
-                HandleSocketMessage(data);
-            }
-        });
-
-        resolve();
-    } else {
-        // NO TOKEN
-        console.log("NO TOKEN??");
-        reject();
-    }
-});
-
-const AttemptToAuthenticate = new Promise((resolve, reject) => {
+function AttemptToAuthenticate() {
     const requestOptions = {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -113,94 +67,128 @@ const AttemptToAuthenticate = new Promise((resolve, reject) => {
         .then(res => res.json())
         .then(json => {
             if (!json.errors) {
-                console.log("token??");
                 token = json.token;
-                console.log(token);
-                resolve();
+
+                InitializeWebSocket();
             } else {
-               reject();
+                console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
+
+                setTimeout(AttemptToAuthenticate, 5000);
             }
         })
         .catch(err => {
-            reject();
+            console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
+
+            setTimeout(AttemptToAuthenticate, 5000);
         });
-});
-
-function HandleSocketMessage(data) {
-    data = JSON.parse(data);
-
-    // Is initialization?
-    if (data.initialization) {
-        console.log(data.message);
-
-        console.log("Sending ID's to server, waiting for data send event.");
-        console.log('');
-
-        ws.send(JSON.stringify({
-            growId: raspberryPiGrowId,
-            configId: raspberryPiGrowConfigId,
-            scriptId: raspberryPiId,
-            identify: true
-        }));
-    }
-
-    if (data.send) {
-        HandleSocketSend(data)
-    }
-
-    // Is relay manual override?
-    if (data.relayOverride) {
-        // Collect GPIO pin and attempt to turn it on / off
-    }
-
-    if (data.updateConfig) {
-        // Refresh config data and re-initialize
-        console.log("Update Config Event Received.");
-        currentGrowConfig = data.config;
-        ScheduleRelays();
-    }
 }
 
-function HandleSocketSend(data) {
-    console.log("Received trigger for send event... beginning data loop...");
-    console.log('');
-    currentGrow = data.grow;
-    currentGrowConfig = data.config;
+function InitializeWebSocket() {
+    if (token) {
+        ws = new WebSocket("wss://api.robogrow.io", {
+            headers: {
+                token: token
+            },
+            followRedirects: true
+        }, {
+            followRedirects: true
+        });
 
-    // Only run this if needed
-    if (!relaysAreInitialized) {
-        ScheduleRelays();
+        console.log("Initializing Websocket... " + ws.url);
+
+        ws.on('open', function () {
+            console.log('Connection successfully opened to server.');
+            console.log('Turning on green connectivity LED.');
+            connectedGreenLED.writeSync(1);
+        });
+
+        ws.on('error', function (error) {
+            console.log(`WebSocket error: ${error}`)
+        });
+
+        ws.on('close', function close() {
+            console.log('Connection broken to server... Attempting to re-open connection in 5 seconds.');
+            console.log('Turning off green connectivity LED.');
+            console.log('');
+            connectedGreenLED.writeSync(0);
+
+            setTimeout(AttemptToAuthenticate, 5000);
+
+            console.log('Stopping data send handler.');
+            clearInterval(dataHandler);
+        });
+
+        ws.on('message', function (data, flags) {
+            if (data) {
+                data = JSON.parse(data);
+
+                // Is initialization?
+                if (data.initialization) {
+                    console.log(data.message);
+
+                    console.log("Sending ID's to server, waiting for data send event.");
+                    console.log('');
+
+                    ws.send(JSON.stringify({
+                        growId: raspberryPiGrowId,
+                        configId: raspberryPiGrowConfigId,
+                        scriptId: raspberryPiId,
+                        identify: true
+                    }));
+                }
+
+                if (data.send) {
+                    console.log("Received trigger for send event... beginning data loop...");
+                    console.log('');
+                    currentGrow = data.grow;
+                    currentGrowConfig = data.config;
+
+                    // Only run this if needed
+                    if (!relaysAreInitialized) {
+                        ScheduleRelays();
+                    } else {
+                        console.log("Relays have already been initialized. :D");
+                    }
+
+                    let minutes = 10;
+                    let interval = minutes * 60 * 1000;
+                    let noSleepInterval = 59 * 1000; // 59 seconds (socket timeout is 60 seconds)
+                    let conditionalSensorReadInterval = 1 * 1000; // 1 second (this helps keep conditional relays in check)
+
+                    console.log("Setting data report interval " + minutes + " minutes");
+
+                    // Set sensor data loop
+                    noSleepHandler = setInterval(SendNoSleepPacket, noSleepInterval); // 59 seconds
+
+                    dataHandler = setInterval(function () {
+                        AttemptToGetDataFromSensors(true).then(r => {/*do nothing*/
+                        });
+                    }, interval); // 10 minute(s)
+
+                    dataHandler = setInterval(function () {
+                        AttemptToGetDataFromSensors(false).then(r => {/*do nothing*/
+                        });
+                    }, conditionalSensorReadInterval); // 1 second
+                }
+
+                // Is relay manual override?
+                if (data.relayOverride) {
+                    // Collect GPIO pin and attempt to turn it on / off
+                }
+
+                if (data.updateConfig) {
+                    // Refresh config data and re-initialize
+                    console.log("Update Config Event Received.");
+
+                    currentGrowConfig = data.config;
+                    ScheduleRelays();
+                }
+            }
+        });
     } else {
-        console.log("Relays have already been initialized. :D");
+        // NO TOKEN
+        console.log("NO TOKEN??");
     }
-
-    console.log("Setting data report interval " + minutes + " minutes");
-    console.log("Setting conditional relay interval 1 seconds");
-
-    // Set sensor data loop
-    noSleepHandler = setInterval(SendNoSleepPacket, noSleepInterval); // 59 seconds
-
-    dataHandler = setInterval(function () {
-        AttemptToGetDataFromSensors(true).then(r => {/*do nothing*/
-        });
-    }, interval); // 10 minute(s)
-
-    relayHandler = setInterval(function () {
-        AttemptToGetDataFromSensors(false).then(r => {/*do nothing*/
-        });
-    }, conditionalSensorReadInterval); // 1 second
-}
-
-function HandleSocketClose() {
-    console.log('Connection broken to server... Attempting to re-open connection in 5 seconds.');
-    console.log('Turning off green connectivity LED.');
-    console.log('');
-    connectedGreenLED.writeSync(0);
-
-    setTimeout(Initialize, 5000);
-
-    console.log('Stopping data send handler.');
-    clearInterval(dataHandler);
 }
 
 async function SendNoSleepPacket() {
@@ -213,7 +201,7 @@ async function AttemptToGetDataFromSensors(sendToServer) {
     // TODO: Determine if any relays need to be toggled.
     console.log("Toggle Relay! " + bigRelayPin.readSync());
 
-    let x = (bigRelayPin.readSync() == 0) ? 1: 0;
+    let x = (bigRelayPin.readSync() == 0) ? 1 : 0;
     bigRelayPin.writeSync(x);
 
     tempSensor.read(22, 4, function (err, temperature, humidity) {
@@ -327,7 +315,7 @@ async function CheckConditionalRelayStatus(dataObject) {
                     } else if (condition.type == 1) { // Humidity
                         if (dataObject.humidity < condition.minValue) {
                             // if minValue, we're looking for something to get too 'low'
-                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus, "Humidity Too LOW. Setting relayIndex " )
+                            LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.underMinStatus, "Humidity Too LOW. Setting relayIndex ")
                         } else if (dataObject.humidity > condition.maxValue) {
                             // if maxValue, we're looking for something to get too 'high'
                             LookForRelayIdAndSetDesiredStatus(condition.relayIndex, condition.overMaxStatus, "Humidity Too HIGH. Setting relayIndex ")
@@ -508,6 +496,3 @@ function DetermineRequiredRelayStatus(relay, schedule) {
         }
     }
 }
-
-/** Start Script */
-Initialize();
