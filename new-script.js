@@ -204,95 +204,48 @@ async function AttemptToGetDataFromSensors(sendToServer) {
     let x = (bigRelayPin.readSync() == 0) ? 1 : 0;
     bigRelayPin.writeSync(x);
 
-    tempSensor.read(22, 7, function (err, temperature, humidity) {
-        if (!err) {
-            console.log("...");
-            var cTemp = temperature;
-            var fTemp = (cTemp * 9 / 5 + 32).toFixed(2);
+    tempSensor.initialize(22, 7);
 
-            if (fTemp && fTemp != 0.0) {
-                tempGreenLED.writeSync(1);
-            }
+    tempSensor.read(22, 7).then(
+        function (res) {
+            console.log("No Error Reading TEMP");
+            let cTemp = res.temperature;
+            let fTemp = (cTemp * 9 / 5 + 32).toFixed(2);
 
-            humidity = (humidity) ? humidity.toFixed(2) : undefined;
+            let humidity = (res.humidity) ? res.humidity.toFixed(2) : undefined;
 
             if (sendToServer) {
                 console.log("Temp: " + fTemp + " Humidity: " + humidity);
             }
 
-            // navigator.mediaDevices.getUserMedia({
-            //     video: {
-            //         width: 426,
-            //         height: 240
-            //     }
-            // }).then((stream) => video.srcObject = stream);
+            let infrared = undefined;
+            let lux = undefined;
 
-            var infrared;
-            var lux;
-            getLumen().then(function (luxObj) {
-                infrared = (luxObj && luxObj.infrared) ? luxObj.infrared.toFixed(2) : undefined;
-                lux = (luxObj && luxObj.lux) ? luxObj.lux.toFixed(2) : undefined;
+            var dataObject = {
+                growId: raspberryPiGrowId,
+                temp: fTemp,
+                humidity: humidity,
+                infrared: infrared,
+                lux: lux,
+                config: currentGrowConfig,
+                createGrowEvent: true
+            };
 
-                if (sendToServer) {
-                    console.log("Infrared: " + infrared + " Lux: " + lux);
-                }
+            if (!sendToServer) {
+                // Compare last sent data object with new data object
+                CheckConditionalRelayStatus(dataObject);
+            } else {
+                console.log("Sending sensor data now.");
+                console.log("");
 
-                var dataObject = {
-                    growId: raspberryPiGrowId,
-                    temp: fTemp,
-                    humidity: humidity,
-                    infrared: infrared,
-                    lux: lux,
-                    config: currentGrowConfig,
-                    createGrowEvent: true
-                };
-
-                if (!sendToServer) {
-                    // Compare last sent data object with new data object
-                    CheckConditionalRelayStatus(dataObject);
-                } else {
-                    console.log("Sending sensor data now.");
-                    console.log("");
-
-                    ws.send(JSON.stringify(dataObject));
-                    lastDataObject = dataObject;
-                }
-                // }
-            }).catch((e) => {
-                // EREMOTEIO Cannot read / write TSL2561
-
-                if (sendToServer) {
-                    console.log("Could not read infrared / lumen sensor.".red);
-
-                    console.log(" ");
-                }
-
-                var dataObject = {
-                    growId: raspberryPiGrowId,
-                    temp: fTemp,
-                    humidity: humidity,
-                    infrared: infrared,
-                    lux: lux,
-                    config: currentGrowConfig,
-                    createGrowEvent: true
-                };
-
-                if (!sendToServer) {
-                    // Compare last sent data object with new data object
-                    CheckConditionalRelayStatus(dataObject);
-                } else {
-                    console.log("Sending sensor data now.");
-                    console.log("");
-
-                    ws.send(JSON.stringify(dataObject));
-                    lastDataObject = dataObject;
-                }
-            });
-        } else {
-            console.log("ERR");
+                ws.send(JSON.stringify(dataObject));
+                lastDataObject = dataObject;
+            }
+        },
+        function (err) {
+            console.log("Error Reading TEMP");
             console.log(err);
-        }
-    });
+        });
 }
 
 // TODO: This function needs to be made much more generic, lots of duplicated code
