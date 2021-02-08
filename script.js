@@ -465,7 +465,7 @@ function ScheduleRelays() {
 }
 
 function DetermineRequiredRelayStatus(relay, schedule) {
-    if (relay && schedule.currentEvent) {
+    if (relay && schedule.currentEvent ) {
         console.log("Checking relay " + relay._gpio);
         if (relay.readSync() !== schedule.currentEvent.status) {
             console.log("Setting " + relay._gpio + " to " + schedule.currentEvent.status);
