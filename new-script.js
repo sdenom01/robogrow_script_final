@@ -54,7 +54,9 @@ const AttemptToAuthenticate = new Promise((resolve, reject) => {
         .then(res => res.json())
         .then(json => {
             if (!json.errors) {
+                console.log("token??");
                 token = json.token;
+                console.log(token);
                 resolve();
             } else {
                reject();
