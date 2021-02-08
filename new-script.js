@@ -204,7 +204,7 @@ async function AttemptToGetDataFromSensors(sendToServer) {
     let x = (bigRelayPin.readSync() == 0) ? 1 : 0;
     bigRelayPin.writeSync(x);
 
-    tempSensor.read(22, 4, function (err, temperature, humidity) {
+    tempSensor.read(22, 7, function (err, temperature, humidity) {
         if (!err) {
             console.log("...");
             var cTemp = temperature;
