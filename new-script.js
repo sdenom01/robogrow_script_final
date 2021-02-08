@@ -40,32 +40,20 @@ let lastDataObject;
 let currentGrowConfig;
 let relaysAreInitialized = false;
 
-const AttemptToAuthenticate = new Promise((resolve, reject) => {
-    const requestOptions = {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            "email": "sdenomme15@gmail.com",
-            "password": "pasteFlux1992"
-        })
-    };
+function Initialize() {
+    // Authenticate with API
+    AttemptToAuthenticate.then(() => {
+        console.log("RESOLVE");
 
-    fetch('https://api.robogrow.io/authenticate', requestOptions)
-        .then(res => res.json())
-        .then(json => {
-            if (!json.errors) {
-                console.log("token??");
-                token = json.token;
-                console.log(token);
-                resolve();
-            } else {
-               reject();
-            }
-        })
-        .catch(err => {
-            reject();
-        });
-});
+        // Successfully Authenticated
+        InitializeWebSocket.then();
+    }).catch(() => {
+        console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
+
+        // Retry until successful
+        setTimeout(Initialize, 5000);
+    });
+}
 
 const InitializeWebSocket = new Promise((resolve, reject) => {
     if (token) {
@@ -106,6 +94,33 @@ const InitializeWebSocket = new Promise((resolve, reject) => {
         // NO TOKEN
         console.log("NO TOKEN??");
     }
+});
+
+const AttemptToAuthenticate = new Promise((resolve, reject) => {
+    const requestOptions = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            "email": "sdenomme15@gmail.com",
+            "password": "pasteFlux1992"
+        })
+    };
+
+    fetch('https://api.robogrow.io/authenticate', requestOptions)
+        .then(res => res.json())
+        .then(json => {
+            if (!json.errors) {
+                console.log("token??");
+                token = json.token;
+                console.log(token);
+                resolve();
+            } else {
+               reject();
+            }
+        })
+        .catch(err => {
+            reject();
+        });
 });
 
 function HandleSocketMessage(data) {
@@ -489,19 +504,6 @@ function DetermineRequiredRelayStatus(relay, schedule) {
             console.log("\r\n");
         }
     }
-}
-
-function Initialize() {
-    // Authenticate with API
-    AttemptToAuthenticate.then(() => {
-        // Successfully Authenticated
-        InitializeWebSocket.then();
-    }).catch(() => {
-        console.log("Error authenticating... Attempting to authenticate again in 5 seconds.");
-
-        // Retry until successful
-        setTimeout(Initialize, 5000);
-    });
 }
 
 /** Start Script */
